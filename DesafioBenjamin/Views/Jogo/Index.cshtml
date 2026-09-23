@@ -1,0 +1,69 @@
+@model List<DesafioBenjamin.Models.Questao>
+
+@{
+    ViewData["Title"] = "Desafio de Geografia";
+    var questionario = ViewBag.Questionario
+        as DesafioBenjamin.Models.Questionario;
+}
+
+<div class="container py-4">
+
+    <div class="text-center mb-4">
+
+        <div style="font-size:60px">🌎</div>
+
+        <h1 class="fw-bold">
+            Desafio do Benjamin
+        </h1>
+
+        <h4>
+            @questionario?.Titulo
+        </h4>
+
+        <p class="text-muted">
+            @questionario?.Capitulo
+        </p>
+
+    </div>
+
+    <div class="alert alert-primary text-center">
+
+        🎯 Foram sorteadas
+
+        <strong>
+            @Model.Count perguntas
+        </strong>
+
+        para este desafio.
+
+    </div>
+
+    <div class="text-center mt-5">
+
+        <h2>Preparado, Benjamin? 😃</h2>
+
+        <p>
+            Leia cada pergunta com atenção e escolha
+            a resposta que você considera correta.
+        </p>
+
+        <form asp-controller="Jogo" asp-action="Iniciar" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                name="questionarioId"
+                value="@questionario?.Id" />
+
+            <button type="submit"
+                    class="btn btn-success btn-lg mt-3">
+
+                🚀 COMEÇAR DESAFIO
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>

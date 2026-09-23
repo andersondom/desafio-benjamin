@@ -1,0 +1,72 @@
+@model DesafioBenjamin.Models.Questao
+
+@{
+    ViewData["Title"] = "Pergunta";
+
+    var tentativa =
+        ViewBag.Tentativa as DesafioBenjamin.Models.Tentativa;
+}
+
+<div class="container py-4"
+     style="max-width:800px">
+
+    <div class="d-flex justify-content-between mb-3">
+
+        <span>
+            🌎 Geografia
+        </span>
+
+        <span>
+            🎯 Desafio #@tentativa?.Id
+        </span>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body p-4 p-md-5">
+
+            <div class="mb-3 text-muted">
+                ❓ Pergunta
+            </div>
+
+            <h2 class="fw-bold mb-4">
+                @Model.Enunciado
+            </h2>
+
+            <div class="d-grid gap-3">
+
+                @{
+                    var letras = new[] { "A", "B", "C", "D" };
+                    var indice = 0;
+                }
+
+                @foreach (var alternativa in Model.Alternativas)
+                {
+                    <button type="button"
+                            class="btn btn-outline-primary btn-lg text-start">
+
+                        <strong>
+                            @letras[indice])
+                        </strong>
+
+                        @alternativa.Texto
+
+                    </button>
+
+                    indice++;
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="text-center text-muted mt-4">
+
+        💡 Leia com atenção antes de responder.
+
+    </div>
+
+</div>

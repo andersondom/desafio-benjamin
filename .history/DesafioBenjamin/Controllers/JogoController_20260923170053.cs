@@ -1,0 +1,136 @@
+using DesafioBenjamin.Data;
+using DesafioBenjamin.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace DesafioBenjamin.Controllers;
+
+public class JogoController : Controller
+{
+    private readonly AppDbContext _context;
+
+    public JogoController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IActionResult> Index(int id)
+    {
+        var questionario = await _context.Questionarios
+            .Include(q => q.Disciplina)
+            .Include(q => q.Questoes)
+                .ThenInclude(q => q.Alternativas)
+            .FirstOrDefaultAsync(q => q.Id == id && q.Ativo);
+
+        if (questionario == null)
+            return NotFound();
+
+        // Sorteia até 15 questões.
+        var questoes = questionario.Questoes
+            .OrderBy(_ => Guid.NewGuid())
+            .Take(15)
+            .ToList();
+
+        ViewBag.Questionario = questionario;
+
+        return View(questoes);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Iniciar(int questionarioId)
+    {
+        var aluno = await _context.Alunos
+            .FirstOrDefaultAsync(a => a.Nome == "Benjamin" && a.Ativo);
+
+        if (aluno == null)
+            return NotFound("Aluno Benjamin não encontrado.");
+
+        var questionario = await _context.Questionarios
+            .Include(q => q.Questoes)
+            .FirstOrDefaultAsync(q =>
+                q.Id == questionarioId &&
+                q.Ativo);
+
+        if (questionario == null)
+            return NotFound("Questionário não encontrado.");
+
+        var questoesSorteadas = questionario.Questoes
+            .OrderBy(_ => Guid.NewGuid())
+            .Take(15)
+            .ToList();
+
+        if (questoesSorteadas.Count == 0)
+            return BadRequest("O questionário não possui questões.");
+
+        var tentativa = new Tentativa
+        {
+            AlunoId = aluno.Id,
+            QuestionarioId = questionario.Id,
+            IniciadaEm = DateTime.Now,
+            TotalQuestoes = questoesSorteadas.Count,
+            TotalAcertos = 0,
+            TotalErros = 0,
+            PercentualAcertos = 0
+        };
+
+        // Guarda as questões sorteadas e a ordem da partida.
+        for (int i = 0; i < questoesSorteadas.Count; i++)
+        {
+            tentativa.Questoes.Add(new TentativaQuestao
+            {
+                QuestaoId = questoesSorteadas[i].Id,
+                Ordem = i + 1
+            });
+        }
+
+        _context.Tentativas.Add(tentativa);
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(
+            nameof(Pergunta),
+            new
+            {
+                tentativaId = tentativa.Id,
+                ordem = 1
+            });
+    }
+
+    public async Task<IActionResult> Pergunta(
+    int tentativaId,
+    int ordem = 1)
+{
+    var tentativa = await _context.Tentativas
+        .Include(t => t.Questionario)
+        .Include(t => t.Aluno)
+        .FirstOrDefaultAsync(t => t.Id == tentativaId);
+
+    if (tentativa == null)
+        return NotFound();
+
+    var tentativaQuestao = await _context.TentativaQuestoes
+        .Include(tq => tq.Questao)
+            .ThenInclude(q => q.Alternativas)
+        .FirstOrDefaultAsync(tq =>
+            tq.TentativaId == tentativaId &&
+            tq.Ordem == ordem);
+
+    if (tentativaQuestao == null)
+        return NotFound();
+
+    var questao = tentativaQuestao.Questao;
+
+    // Embaralha as alternativas.
+    questao.Alternativas = questao.Alternativas
+        .OrderBy(_ => Guid.NewGuid())
+        .ToList();
+
+    ViewBag.Tentativa = tentativa;
+    ViewBag.Ordem = ordem;
+
+    return View(questao);
+}
+
+    
+}
