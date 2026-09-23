@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# SQLite - dados do Benjamin
+*.db
+*.db-shm
+*.db-wal
+
+# Arquivos locais
+*.user
+*.suo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
