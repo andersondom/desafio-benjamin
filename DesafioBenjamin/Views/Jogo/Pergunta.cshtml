@@ -1,91 +1,88 @@
 @model DesafioBenjamin.Models.Questao
+@using DesafioBenjamin.Models
 
 @{
     ViewData["Title"] = "Pergunta";
-
-    var tentativa =
-        ViewBag.Tentativa as DesafioBenjamin.Models.Tentativa;
+    var tentativa = ViewBag.Tentativa as Tentativa;
+    var resposta = ViewBag.Resposta as Resposta;
+    int ordem = (int)ViewBag.Ordem;
+    int corretaId = (int)ViewBag.AlternativaCorretaId;
+    var letras = new[] { "A", "B", "C", "D" };
 }
 
 <div class="container py-4" style="max-width:800px">
-
     <div class="d-flex justify-content-between mb-3">
-
-        <span>
-            🌎 Geografia
-        </span>
-
-        <span>
-            🎯 Desafio #@tentativa?.Id
-        </span>
-
+        <span>🌎 Geografia</span>
+        <span>🎯 Desafio #@tentativa?.Id</span>
     </div>
 
     <div class="card shadow-sm border-0">
-
         <div class="card-body p-4 p-md-5">
-
-            <div class="mb-3">
-
             <div class="d-flex justify-content-between mb-2">
-                <span class="fw-bold">
-                    ❓ Pergunta @ViewBag.Ordem de @tentativa?.TotalQuestoes
-                </span>
-
-                <span class="text-muted">
-                    🎯 @tentativa?.TotalAcertos acertos
-                </span>
+                <span class="fw-bold">❓ Pergunta @ordem de @tentativa?.TotalQuestoes</span>
+                <span class="text-muted">🎯 @tentativa?.TotalAcertos acertos</span>
             </div>
 
-            <div class="progress"
-                style="height: 10px;">
+            <div class="progress mb-4" style="height:10px">
+                <div class="progress-bar bg-success" role="progressbar"
+                     style="width:@((ordem * 100) / tentativa!.TotalQuestoes)%"></div>
+            </div>
 
-                <div class="progress-bar bg-success"
-                    role="progressbar"
-                    style="width: @(((int)ViewBag.Ordem * 100) / tentativa!.TotalQuestoes)%">
+            <h2 class="fw-bold mb-4">@Model.Enunciado</h2>
+
+            @if (resposta == null)
+            {
+                <form asp-action="Responder" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="tentativaId" value="@tentativa!.Id" />
+                    <input type="hidden" name="ordem" value="@ordem" />
+
+                    <div class="d-grid gap-3">
+                        @for (var i = 0; i < Model.Alternativas.Count; i++)
+                        {
+                            var alternativa = Model.Alternativas[i];
+                            <button type="submit" name="alternativaId" value="@alternativa.Id"
+                                    class="btn btn-outline-primary btn-lg text-start">
+                                <strong>@letras[i])</strong> @alternativa.Texto
+                            </button>
+                        }
+                    </div>
+                </form>
+            }
+            else
+            {
+                var acertou = resposta.Acertou;
+                <div class="alert @(acertou ? "alert-success" : "alert-warning") mt-3">
+                    <h4 class="alert-heading fw-bold">
+                        @(acertou ? "🎉 Acertou, Benjamin!" : "📚 Quase! Vamos aprender essa juntos.")
+                    </h4>
+                    @if (!acertou)
+                    {
+                        var correta = Model.Alternativas.First(a => a.Id == corretaId);
+                        <p class="mb-2"><strong>Resposta correta:</strong> @correta.Texto</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Explicacao))
+                    {
+                        <p class="mb-0">@Model.Explicacao</p>
+                    }
                 </div>
 
-            </div>
-
+                <div class="d-grid mt-4">
+                    <form asp-action="Proxima" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="tentativaId" value="@tentativa!.Id" />
+                        <input type="hidden" name="ordem" value="@ordem" />
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            @(ordem >= tentativa.TotalQuestoes ? "🏆 VER RESULTADO" : "➡️ PRÓXIMA PERGUNTA")
+                        </button>
+                    </form>
+                </div>
+            }
         </div>
-
-            <h2 class="fw-bold mb-4">
-                @Model.Enunciado
-            </h2>
-
-            <div class="d-grid gap-3">
-
-                @{
-                    var letras = new[] { "A", "B", "C", "D" };
-                    var indice = 0;
-                }
-
-                @foreach (var alternativa in Model.Alternativas)
-                {
-                    <button type="button"
-                            class="btn btn-outline-primary btn-lg text-start">
-
-                        <strong>
-                            @letras[indice])
-                        </strong>
-
-                        @alternativa.Texto
-
-                    </button>
-
-                    indice++;
-                }
-
-            </div>
-
-        </div>
-
     </div>
 
-    <div class="text-center text-muted mt-4">
-
-        💡 Leia com atenção antes de responder.
-
-    </div>
-
+    @if (resposta == null)
+    {
+        <div class="text-center text-muted mt-4">💡 Leia com atenção antes de responder.</div>
+    }
 </div>
