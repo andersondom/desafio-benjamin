@@ -9,15 +9,20 @@ public static class DbInitializer
     {
         await context.Database.MigrateAsync();
 
-        // Evita cadastrar tudo novamente a cada execução.
-        if (await context.Alunos.AnyAsync())
-            return;
-
-        var benjamin = new Aluno
+        var benjamin = await context.Alunos.FirstOrDefaultAsync(a => a.Nome == "Benjamin");
+        if (benjamin == null)
         {
-            Nome = "Benjamin",
-            Ativo = true
-        };
+            benjamin = new Aluno { Nome = "Benjamin", Ativo = true };
+            context.Alunos.Add(benjamin);
+            await context.SaveChangesAsync();
+        }
+
+        // Cada conteúdo é incluído apenas se ainda não existir.
+        var geografiaExiste = await context.Questionarios.AnyAsync(q =>
+            q.Titulo == "Relevo e Hidrografia" && q.Capitulo == "Capítulo 9");
+
+        if (!geografiaExiste)
+        {
 
         var geografia = new Disciplina
         {
@@ -334,10 +339,60 @@ public static class DbInitializer
             "O diagrama da página 222 identifica, entre outros elementos, nascente, afluente, subafluente, confluência, curso, leito, margens e foz."
         );
 
-        context.Alunos.Add(benjamin);
         context.Questionarios.Add(questionario);
-
         await context.SaveChangesAsync();
+        }
+
+        var inglesExiste = await context.Questionarios.AnyAsync(q =>
+            q.Titulo == "A Song in My Heart" && q.Capitulo == "Unit 3 - Chapter 6");
+
+        if (!inglesExiste)
+        {
+            var ingles = new Disciplina
+            {
+                Nome = "Inglês",
+                Icone = "🇬🇧",
+                Ativa = true
+            };
+
+            var inglesQuiz = new Questionario
+            {
+                Titulo = "A Song in My Heart",
+                Descricao = "Revisão da Unit 3 - Chapter 6",
+                Capitulo = "Unit 3 - Chapter 6",
+                Disciplina = ingles,
+                Ativo = true
+            };
+
+            AdicionarQuestao(inglesQuiz, 1, "David was the _____ son of Jesse.", "youngest", "oldest", "only", "first", "The story says: David was the youngest son of Jesse.");
+            AdicionarQuestao(inglesQuiz, 2, "How many brothers did David have?", "Seven", "Three", "Five", "Ten", "The story says that David had seven brothers.");
+            AdicionarQuestao(inglesQuiz, 3, "What did David take care of?", "His father's sheep", "King Saul's horses", "His brothers' house", "A garden", "David took care of his father's sheep.");
+            AdicionarQuestao(inglesQuiz, 4, "David loved to play his _____ and sing to the Lord.", "harp", "piano", "guitar", "drums", "The story says David loved to play his harp and sing to the Lord.");
+            AdicionarQuestao(inglesQuiz, 5, "King Saul had _____ problems.", "sleeping", "walking", "reading", "traveling", "The story says King Saul had sleeping problems.");
+            AdicionarQuestao(inglesQuiz, 6, "Where was Jesse from?", "Bethlehem", "Jerusalem", "Egypt", "Rome", "The king's servants said Jesse was from the town of Bethlehem.");
+            AdicionarQuestao(inglesQuiz, 7, "Besides being a good musician, David was also a good _____.", "soldier", "teacher", "farmer", "doctor", "The servants described David as a good musician and a good soldier.");
+            AdicionarQuestao(inglesQuiz, 8, "What did David's music help King Saul do?", "Calm down and sleep", "Run and jump", "Work and travel", "Read and write", "David's music helped King Saul calm down and sleep.");
+            AdicionarQuestao(inglesQuiz, 9, "A composer is...", "someone who makes or writes songs", "someone who imitates the sound of birds", "someone who plays the piano well", "someone who only listens to music", "The activity defines a composer as someone who makes or writes songs.");
+            AdicionarQuestao(inglesQuiz, 10, "Complete the Bible gem: “Sing to the Lord _____.”", "a new song!", "every morning!", "with a harp!", "with your friends!", "The Bible gem shown in the material is: “Sing to the Lord a new song!” — Psalm 96:1.");
+            AdicionarQuestao(inglesQuiz, 11, "Which is the past form of COMPOSE?", "composed", "composeed", "compossed", "compose", "The grammar box gives the example compose → composed.");
+            AdicionarQuestao(inglesQuiz, 12, "Which is the past form of WALK?", "walked", "walkd", "walking", "walk", "The matching activity pairs WALK with WALKED.");
+            AdicionarQuestao(inglesQuiz, 13, "Which is the past form of LOOK?", "looked", "lookd", "looking", "look", "The matching activity pairs LOOK with LOOKED.");
+            AdicionarQuestao(inglesQuiz, 14, "Which is the past form of HELP?", "helped", "helpd", "helping", "help", "The matching activity pairs HELP with HELPED.");
+            AdicionarQuestao(inglesQuiz, 15, "Which is the past form of ASK?", "asked", "askd", "asking", "ask", "The matching activity pairs ASK with ASKED.");
+            AdicionarQuestao(inglesQuiz, 16, "Which is the past form of OPEN?", "opened", "opend", "opening", "open", "The matching activity pairs OPEN with OPENED.");
+            AdicionarQuestao(inglesQuiz, 17, "Which is the past form of WORK?", "worked", "workd", "working", "work", "The matching activity pairs WORK with WORKED.");
+            AdicionarQuestao(inglesQuiz, 18, "Which is the past form of JUMP?", "jumped", "jumpd", "jumping", "jump", "The matching activity pairs JUMP with JUMPED.");
+            AdicionarQuestao(inglesQuiz, 19, "Which is the past form of ANSWER?", "answered", "answerd", "answering", "answer", "The matching activity pairs ANSWER with ANSWERED.");
+            AdicionarQuestao(inglesQuiz, 20, "Which is the past form of WATCH?", "watched", "watchd", "watching", "watch", "The matching activity pairs WATCH with WATCHED.");
+            AdicionarQuestao(inglesQuiz, 21, "Which is the past form of TALK?", "talked", "talkd", "talking", "talk", "The matching activity pairs TALK with TALKED.");
+            AdicionarQuestao(inglesQuiz, 22, "The grammar box says action words are called _____.", "verbs", "adjectives", "nouns", "songs", "The material says: Action words are called verbs.");
+            AdicionarQuestao(inglesQuiz, 23, "What does “past” indicate in the grammar lesson?", "The action happened before", "The action is happening now", "The action will happen tomorrow", "The word is a feeling", "The material explains that -ed can show that an action happened in the past.");
+            AdicionarQuestao(inglesQuiz, 24, "If a verb ends with “e”, what does the hint tell you to add?", "d", "ed", "ing", "s", "The hint says that if the word ends with an “e”, you just add a “d”.");
+            AdicionarQuestao(inglesQuiz, 25, "Which sentence uses the past form shown in the lesson?", "King David played the harp.", "King David play the harp.", "King David playing the harp.", "King David plays the harp tomorrow.", "The grammar example in the material is: “A long time ago, King David played the harp.”");
+
+            context.Questionarios.Add(inglesQuiz);
+            await context.SaveChangesAsync();
+        }
     }
 
     private static void AdicionarQuestao(
