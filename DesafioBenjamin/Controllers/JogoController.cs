@@ -83,6 +83,7 @@ public class JogoController : Controller
     {
         var tentativa = await _context.Tentativas
             .Include(t => t.Questionario)
+                .ThenInclude(q => q.Disciplina)
             .Include(t => t.Aluno)
             .FirstOrDefaultAsync(t => t.Id == tentativaId);
 
@@ -104,7 +105,9 @@ public class JogoController : Controller
             .FirstOrDefaultAsync(r => r.TentativaId == tentativaId && r.QuestaoId == tentativaQuestao.QuestaoId);
 
         var questao = tentativaQuestao.Questao;
-        questao.Alternativas = questao.Alternativas.OrderBy(a => a.Id).ToList();
+        questao.Alternativas = respostaExistente == null
+            ? questao.Alternativas.OrderBy(_ => Guid.NewGuid()).ToList()
+            : questao.Alternativas.OrderBy(a => a.Id).ToList();
 
         ViewBag.Tentativa = tentativa;
         ViewBag.Ordem = ordem;
@@ -167,12 +170,13 @@ public class JogoController : Controller
         var tentativa = await _context.Tentativas.FindAsync(tentativaId);
         if (tentativa == null) return NotFound();
 
+        var tentativaQuestao = await _context.TentativaQuestoes
+            .FirstOrDefaultAsync(tq => tq.TentativaId == tentativaId && tq.Ordem == ordem);
+
+        if (tentativaQuestao == null) return NotFound();
+
         var respondeu = await _context.Respostas.AnyAsync(r =>
-            r.TentativaId == tentativaId &&
-            _context.TentativaQuestoes.Any(tq =>
-                tq.TentativaId == tentativaId &&
-                tq.Ordem == ordem &&
-                tq.QuestaoId == r.QuestaoId));
+            r.TentativaId == tentativaId && r.QuestaoId == tentativaQuestao.QuestaoId);
 
         if (!respondeu)
             return RedirectToAction(nameof(Pergunta), new { tentativaId, ordem });
