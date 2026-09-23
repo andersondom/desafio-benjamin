@@ -1,97 +1,43 @@
-﻿@{
+@model IEnumerable<DesafioBenjamin.Models.Questionario>
+@{
     ViewData["Title"] = "Desafio do Benjamin";
 }
-
 <div class="benjamin-home">
-
     <section class="hero-benjamin">
         <div>
             <span class="hero-badge">🎓 Minha área de estudos</span>
-
             <h1>Olá, Benjamin! 👋</h1>
-
-            <p>
-                Preparado para mais um desafio?
-                Escolha uma disciplina e mostre o que você aprendeu!
-            </p>
+            <p>Preparado para mais um desafio? Escolha uma disciplina e mostre o que você aprendeu!</p>
         </div>
-
-        <div class="hero-trophy">
-            🏆
-        </div>
+        <div class="hero-trophy">🏆</div>
     </section>
 
     <section class="resumo">
-        <div class="resumo-card">
-            <span>🎮</span>
-            <div>
-                <strong>0</strong>
-                <small>Desafios realizados</small>
-            </div>
-        </div>
-
-        <div class="resumo-card">
-            <span>⭐</span>
-            <div>
-                <strong>0%</strong>
-                <small>Aproveitamento</small>
-            </div>
-        </div>
-
-        <div class="resumo-card">
-            <span>🔥</span>
-            <div>
-                <strong>0</strong>
-                <small>Acertos</small>
-            </div>
-        </div>
+        <div class="resumo-card"><span>🎮</span><div><strong>@ViewBag.TotalDesafios</strong><small>Desafios realizados</small></div></div>
+        <div class="resumo-card"><span>⭐</span><div><strong>@ViewBag.Aproveitamento%</strong><small>Aproveitamento</small></div></div>
+        <div class="resumo-card"><span>🔥</span><div><strong>@ViewBag.TotalAcertos</strong><small>Acertos</small></div></div>
     </section>
 
     <section class="disciplinas">
-
-        <div class="titulo-secao">
-            <div>
-                <h2>Meus desafios</h2>
-                <p>Escolha uma disciplina para começar.</p>
-            </div>
-        </div>
-
+        <div class="titulo-secao"><div><h2>Meus desafios</h2><p>Escolha uma disciplina para começar.</p></div></div>
         <div class="grade-disciplinas">
-
-            <article class="disciplina-card geografia">
-
-                <div class="disciplina-icone">
-                    🌎
-                </div>
-
-                <div class="disciplina-conteudo">
-                    <span class="materia">GEOGRAFIA</span>
-
-                    <h3>Relevo e Hidrografia</h3>
-
-                    <p>
-                        Capítulo 9 • Páginas 216–224
-                    </p>
-
-                    <div class="info-quiz">
-                        <span>❓ 15 perguntas por partida</span>
-                        <span>🎲 Perguntas sorteadas</span>
+            @foreach (var quiz in Model)
+            {
+                var classe = quiz.Disciplina.Nome == "Geografia" ? "geografia" : "ingles";
+                <article class="disciplina-card @classe">
+                    <div class="disciplina-icone">@quiz.Disciplina.Icone</div>
+                    <div class="disciplina-conteudo">
+                        <span class="materia">@quiz.Disciplina.Nome.ToUpper()</span>
+                        <h3>@quiz.Titulo</h3>
+                        <p>@quiz.Capitulo</p>
+                        <div class="info-quiz">
+                            <span>❓ 15 perguntas por partida</span>
+                            <span>🎲 Perguntas sorteadas</span>
+                        </div>
+                        <a asp-controller="Jogo" asp-action="Index" asp-route-id="@quiz.Id" class="btn-jogar">🎮 JOGAR AGORA</a>
                     </div>
-
-                    <a asp-controller="Jogo"
-                       asp-action="Index"
-                       asp-route-id="1"
-                       class="btn-jogar">
-
-                        🎮 JOGAR AGORA
-
-                    </a>
-                </div>
-
-            </article>
-
+                </article>
+            }
         </div>
-
     </section>
-
 </div>
