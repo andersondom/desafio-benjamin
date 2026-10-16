@@ -1,41 +1,22 @@
 using DesafioBenjamin.Data;
+using DesafioBenjamin.Services.OCR;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ======================================================
-// BANCO DE DADOS
-// ======================================================
-
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
-
-// ======================================================
-// MVC
-// ======================================================
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IOcrService, TesseractOcrService>();
 
 var app = builder.Build();
 
-// ======================================================
-// BANCO - MIGRATIONS E DADOS INICIAIS
-// ======================================================
-
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider
-        .GetRequiredService<AppDbContext>();
-
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await DbInitializer.InicializarAsync(context);
 }
-
-// ======================================================
-// PIPELINE HTTP
-// ======================================================
 
 if (!app.Environment.IsDevelopment())
 {
@@ -44,17 +25,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
-
 app.UseAuthorization();
-
 app.MapStaticAssets();
-
-// ======================================================
-// ROTAS
-// ======================================================
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
