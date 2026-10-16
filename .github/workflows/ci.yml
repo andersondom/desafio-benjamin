@@ -1,0 +1,22 @@
+name: Build Desafio Benjamin
+
+on:
+  push:
+    branches:
+      - feat/infra-gratuita-v2
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore DesafioBenjamin/DesafioBenjamin.csproj
+      - name: Build
+        run: dotnet build DesafioBenjamin/DesafioBenjamin.csproj --configuration Release --no-restore
