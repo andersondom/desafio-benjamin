@@ -9,6 +9,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Data Source=/app/data/desafio-benjamin.db"
       Ollama__BaseUrl: http://ollama:11434
+      Ollama__Model: qwen3:4b
     volumes:
       - app-data:/app/data
       - materials:/app/materials
@@ -17,10 +18,14 @@ services:
     restart: unless-stopped
   ollama:
     image: ollama/ollama:latest
+    environment:
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: "2m"
     volumes:
       - ollama-data:/root/.ollama
     restart: unless-stopped
-    # GPU acceleration requires host-specific configuration; CPU works by default.
+    # CPU-first: NVIDIA MX250 with 2 GB VRAM is not targeted for GPU offload.
 volumes:
   app-data:
   materials:
