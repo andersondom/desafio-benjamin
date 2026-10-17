@@ -25,6 +25,7 @@ public class JogoController : Controller
         if (questionario == null) return NotFound();
 
         var questoes = questionario.Questoes
+            .Where(q => q.Ativa)
             .OrderBy(_ => Guid.NewGuid())
             .Take(15)
             .ToList();
