@@ -5,10 +5,12 @@ using DesafioBenjamin.Data;
 using DesafioBenjamin.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DesafioBenjamin.Controllers;
 
 // Laboratorio de uso local. Exige autenticacao antes de qualquer implantacao publica.
+[Authorize(Roles = "Administrador")]
 [Route("laboratorio-ia")]
 public sealed class LaboratorioIaController : Controller
 {
