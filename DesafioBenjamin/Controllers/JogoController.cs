@@ -50,6 +50,7 @@ public class JogoController : Controller
         if (questionario == null) return NotFound("Questionário não encontrado.");
 
         var questoesSorteadas = questionario.Questoes
+            .Where(q => q.Ativa)
             .OrderBy(_ => Guid.NewGuid())
             .Take(15)
             .ToList();
@@ -106,14 +107,13 @@ public class JogoController : Controller
             .FirstOrDefaultAsync(r => r.TentativaId == tentativaId && r.QuestaoId == tentativaQuestao.QuestaoId);
 
         var questao = tentativaQuestao.Questao;
-        questao.Alternativas = respostaExistente == null
-            ? questao.Alternativas.OrderBy(_ => Guid.NewGuid()).ToList()
-            : questao.Alternativas.OrderBy(a => a.Id).ToList();
+        // Ordem estavel durante a pergunta, inclusive apos recarregar a pagina.
+        questao.Alternativas = questao.Alternativas.OrderBy(a => a.Id).ToList();
 
         ViewBag.Tentativa = tentativa;
         ViewBag.Ordem = ordem;
         ViewBag.Resposta = respostaExistente;
-        ViewBag.AlternativaCorretaId = questao.Alternativas.First(a => a.Correta).Id;
+        ViewBag.AlternativaCorretaId = respostaExistente is null ? 0 : questao.Alternativas.First(a => a.Correta).Id;
 
         return View(questao);
     }
@@ -205,6 +205,11 @@ public class JogoController : Controller
             .FirstOrDefaultAsync(t => t.Id == tentativaId);
 
         if (tentativa == null) return NotFound();
+        if (tentativa.FinalizadaEm == null)
+        {
+            var respondidas = await _context.Respostas.CountAsync(r => r.TentativaId == tentativaId);
+            return RedirectToAction(nameof(Pergunta), new { tentativaId, ordem = Math.Min(respondidas + 1, tentativa.TotalQuestoes) });
+        }
 
         return View(tentativa);
     }
