@@ -19,6 +19,7 @@
         </select>
         <button class="btn btn-primary" type="submit">Consultar</button>
     </form>
+    @if (TempData["Sucesso"] is string sucesso) { <div class="alert alert-success">@sucesso</div> }
     @if (Model.Count == 0)
     {
         <p class="alert alert-info">Nenhuma questao encontrada para este filtro.</p>
@@ -27,7 +28,7 @@
     {
         <article class="card mb-3">
             <div class="card-body">
-                <p class="text-muted mb-1">Questao #@q.Id — @q.Questionario.Titulo</p>
+                <p class="text-muted mb-1">Questao #@q.Id — @q.Questionario.Titulo — <strong>@(q.Ativa ? "Ativa" : "Inativa")</strong></p>
                 <h2 class="h5">@q.Enunciado</h2>
                 <ol type="A">
                     @foreach (var a in q.Alternativas.OrderBy(a => a.Id))
@@ -36,6 +37,11 @@
                     }
                 </ol>
                 <p><strong>Explicacao:</strong> @q.Explicacao</p>
+                <a class="btn btn-outline-primary btn-sm" href="/laboratorio-ia/editar/@q.Id">Consultar / editar</a>
+                <form method="post" action="/laboratorio-ia/alternar/@q.Id" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-warning btn-sm">@(q.Ativa ? "Desativar" : "Reativar")</button>
+                </form>
             </div>
         </article>
     }
