@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using DesafioBenjamin.Services.IA;
 using DesafioBenjamin.Data;
 using DesafioBenjamin.Models;
@@ -76,8 +78,22 @@ public sealed class LaboratorioIaController : Controller
     }
 
 
-    private static string Normalizar(string texto) =>
-        string.Join(" ", texto.Trim().ToUpperInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+    // Chave de comparacao: ignora acentos, pontuacao, caixa e espacos repetidos.
+    // Mantem apenas letras e digitos para bloquear variacoes superficiais do enunciado.
+    private static string Normalizar(string texto)
+    {
+        var decomposed = (texto ?? "").Normalize(NormalizationForm.FormD);
+        var resultado = new StringBuilder(decomposed.Length);
+        foreach (var ch in decomposed)
+        {
+            var categoria = CharUnicodeInfo.GetUnicodeCategory(ch);
+            if (categoria is UnicodeCategory.NonSpacingMark or UnicodeCategory.SpacingCombiningMark)
+                continue;
+            if (char.IsLetterOrDigit(ch))
+                resultado.Append(char.ToUpperInvariant(ch));
+        }
+        return resultado.ToString();
+    }
 
     [HttpGet("editar/{id:int}")]
     public async Task<IActionResult> Editar(int id)
