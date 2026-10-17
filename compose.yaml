@@ -10,6 +10,7 @@ services:
       ConnectionStrings__DefaultConnection: "Data Source=/app/data/desafio-benjamin.db"
       Ollama__BaseUrl: http://ollama:11434
       Ollama__Model: qwen3:4b
+      LABORATORIO_IA_LOCAL: "true"
     volumes:
       - app-data:/app/data
       - materials:/app/materials
