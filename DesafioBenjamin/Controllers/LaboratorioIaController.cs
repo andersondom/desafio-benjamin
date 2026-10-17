@@ -22,7 +22,7 @@ public sealed class LaboratorioIaController : Controller
     }
 
     [HttpGet("")]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         if (!IsLocalRequest()) return NotFound();
         ViewBag.Questionarios = await _db.Questionarios.AsNoTracking().OrderBy(q => q.Titulo).ToListAsync();
