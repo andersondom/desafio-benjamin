@@ -22,15 +22,27 @@
     {
         <section class="card mt-4">
             <div class="card-body">
-                <h2 class="h4">Rascunho nao aprovado</h2>
-                <p>@questao.Enunciado</p>
+                <h2 class="h4">Rascunho para revisao - nao aprovado</h2>
+                <p class="alert alert-info">Edite os campos abaixo para revisar a questao. Esta tela nao salva nem publica conteudo.</p>
+                <label for="enunciadoRevisao" class="form-label">Enunciado editavel</label>
+                <textarea id="enunciadoRevisao" class="form-control mb-3" rows="2">@questao.Enunciado</textarea>
+                
                 <ol type="A">
                 @for (var i = 0; i < questao.Alternativas.Length; i++)
                 {
-                    <li>@questao.Alternativas[i] @(i == questao.IndiceCorreto ? "(indicada como correta pela IA)" : "")</li>
+                    <li class="mb-2"><label class="form-label" for="alternativa-@i">Alternativa @(i + 1) @(i == questao.IndiceCorreto ? "(indicada como correta pela IA)" : "")</label><textarea class="form-control" id="alternativa-@i" rows="2">@questao.Alternativas[i]</textarea></li>
                 }
                 </ol>
-                <p><strong>Explicacao proposta:</strong> @questao.Explicacao</p>
+                <label class="form-label" for="corretaRevisao">Resposta correta (a ser conferida)</label>
+                <select class="form-select mb-3" id="corretaRevisao">
+                @for (var i = 0; i < questao.Alternativas.Length; i++)
+                {
+                    <option value="@i" selected="@(i == questao.IndiceCorreto)">Alternativa @(i + 1)</option>
+                }
+                </select>
+                <label class="form-label" for="explicacaoRevisao">Explicacao editavel</label>
+                <textarea id="explicacaoRevisao" class="form-control mb-3" rows="3">@questao.Explicacao</textarea>
+                <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Imprimir revisao</button>
                 <p class="text-muted">Confira a fidelidade ao livro, a resposta correta e a clareza antes de qualquer uso.</p>
             </div>
         </section>
