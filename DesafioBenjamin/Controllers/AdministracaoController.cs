@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace DesafioBenjamin.Controllers;
 
@@ -26,6 +27,7 @@ public sealed class AdministracaoController : Controller
 
     [AllowAnonymous]
     [HttpPost("entrar")]
+    [EnableRateLimiting("admin-login")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Entrar(string usuario, string senha, string? returnUrl = null)
     {
