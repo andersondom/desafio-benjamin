@@ -37,7 +37,7 @@
                     <option value="">Selecione um questionario</option>
                     @foreach (var q in questionarios.Where(q => q.Ativo))
                     {
-                        <option value="@q.Id">@q.Titulo</option>
+                        <option value="@q.Id" selected="@(ViewBag.QuestionarioSelecionado is int selecionado && selecionado == q.Id)">@q.Titulo</option>
                     }
                 </select>
                 <label for="enunciadoRevisao" class="form-label">Enunciado editavel</label>
