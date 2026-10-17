@@ -2,10 +2,15 @@
     ViewData["Title"] = "Laboratorio de IA";
     var questao = ViewBag.QuestaoGerada as DesafioBenjamin.Services.IA.QuestaoGerada;
     var texto = ViewBag.TextoDidatico as string ?? "";
+    var questionarios = ViewBag.Questionarios as List<DesafioBenjamin.Models.Questionario> ?? new();
 }
 <div class="container py-4">
     <h1>Laboratorio de IA - revisao de questoes</h1>
-    <p class="text-muted">Ambiente local de testes. Nenhuma questao e salva ou publicada automaticamente.</p>
+    <p class="text-muted">Ambiente local de testes. Somente questoes conferidas e aprovadas por um responsavel sao adicionadas ao questionario.</p>
+    @if (TempData["Sucesso"] is string sucesso)
+    {
+        <div class="alert alert-success">@sucesso</div>
+    }
     <form asp-controller="LaboratorioIa" asp-action="Gerar" method="post">
         @Html.AntiForgeryToken()
         <div class="mb-3">
@@ -23,26 +28,39 @@
         <section class="card mt-4">
             <div class="card-body">
                 <h2 class="h4">Rascunho para revisao - nao aprovado</h2>
-                <p class="alert alert-info">Edite os campos abaixo para revisar a questao. Esta tela nao salva nem publica conteudo.</p>
+                <p class="alert alert-info">Revise a fidelidade ao material e a resposta correta antes de aprovar. O rascunho nao e salvo ate sua confirmacao.</p>
+                <form asp-controller="LaboratorioIa" asp-action="Aprovar" method="post">
+                @Html.AntiForgeryToken()
+                <label for="questionarioId" class="form-label">Questionario de destino</label>
+                <select name="questionarioId" id="questionarioId" class="form-select mb-3" required>
+                    <option value="">Selecione um questionario</option>
+                    @foreach (var q in questionarios.Where(q => q.Ativo))
+                    {
+                        <option value="@q.Id">@q.Titulo</option>
+                    }
+                </select>
                 <label for="enunciadoRevisao" class="form-label">Enunciado editavel</label>
-                <textarea id="enunciadoRevisao" class="form-control mb-3" rows="2">@questao.Enunciado</textarea>
+                <textarea id="enunciadoRevisao" name="enunciado" required class="form-control mb-3" rows="2">@questao.Enunciado</textarea>
                 
                 <ol type="A">
                 @for (var i = 0; i < questao.Alternativas.Length; i++)
                 {
-                    <li class="mb-2"><label class="form-label" for="alternativa-@i">Alternativa @(i + 1) @(i == questao.IndiceCorreto ? "(indicada como correta pela IA)" : "")</label><textarea class="form-control" id="alternativa-@i" rows="2">@questao.Alternativas[i]</textarea></li>
+                    <li class="mb-2"><label class="form-label" for="alternativa-@i">Alternativa @(i + 1) @(i == questao.IndiceCorreto ? "(indicada como correta pela IA)" : "")</label><textarea class="form-control" id="alternativa-@i" name="alternativas" required rows="2">@questao.Alternativas[i]</textarea></li>
                 }
                 </ol>
                 <label class="form-label" for="corretaRevisao">Resposta correta (a ser conferida)</label>
-                <select class="form-select mb-3" id="corretaRevisao">
+                <select class="form-select mb-3" id="corretaRevisao" name="indiceCorreto">
                 @for (var i = 0; i < questao.Alternativas.Length; i++)
                 {
                     <option value="@i" selected="@(i == questao.IndiceCorreto)">Alternativa @(i + 1)</option>
                 }
                 </select>
                 <label class="form-label" for="explicacaoRevisao">Explicacao editavel</label>
-                <textarea id="explicacaoRevisao" class="form-control mb-3" rows="3">@questao.Explicacao</textarea>
+                <textarea id="explicacaoRevisao" name="explicacao" required class="form-control mb-3" rows="3">@questao.Explicacao</textarea>
+                <div class="form-check my-3"><input class="form-check-input" type="checkbox" id="revisado" name="revisado" value="true" required /><label class="form-check-label" for="revisado">Conferi o material didatico, as quatro alternativas e a resposta correta.</label></div>
+                <button type="submit" class="btn btn-success">Aprovar e adicionar ao questionario</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="window.print()">Imprimir revisao</button>
+                </form>
                 <p class="text-muted">Confira a fidelidade ao livro, a resposta correta e a clareza antes de qualquer uso.</p>
             </div>
         </section>
