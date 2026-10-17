@@ -9,6 +9,29 @@ public static class DbInitializer
     {
         await context.Database.MigrateAsync();
 
+        // Evolucao aditiva e idempotente: preserva registros, respostas e tentativas.
+        var connection = context.Database.GetDbConnection();
+        await connection.OpenAsync();
+        try
+        {
+            using var check = connection.CreateCommand();
+            check.CommandText = "PRAGMA table_info('Questoes')";
+            var colunaExiste = false;
+            using (var reader = await check.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                    if (string.Equals(reader.GetString(1), "Ativa", StringComparison.OrdinalIgnoreCase))
+                        colunaExiste = true;
+            }
+            if (!colunaExiste)
+            {
+                using var alter = connection.CreateCommand();
+                alter.CommandText = "ALTER TABLE Questoes ADD COLUMN Ativa INTEGER NOT NULL DEFAULT 1";
+                await alter.ExecuteNonQueryAsync();
+            }
+        }
+        finally { await connection.CloseAsync(); }
+
         var benjamin = await context.Alunos.FirstOrDefaultAsync(a => a.Nome == "Benjamin");
         if (benjamin == null)
         {
