@@ -32,7 +32,7 @@ public sealed class OllamaQuestionService
             format = "json",
             messages = new object[]
             {
-                new { role = "system", content = "Voce cria apenas rascunhos de questoes educativas em portugues. Retorne somente JSON valido com propriedades enunciado, alternativas (array de 4 textos), indiceCorreto (0 a 3) e explicacao. Nao inclua raciocinio ou comentarios." },
+                new { role = "system", content = "Voce e um professor de ensino fundamental. Crie UMA pergunta interrogativa clara, terminada em ponto de interrogacao, adequada a uma crianca de 10 anos. As quatro alternativas devem ser distintas, plausiveis, mutuamente exclusivas e ter exatamente uma correta. Evite opcoes parcialmente verdadeiras, ambiguas ou equivalentes. Baseie-se somente no texto recebido, sem inventar fatos. A explicacao deve citar a informacao relevante do texto e justificar a alternativa correta sem afirmar que algo parcialmente verdadeiro e falso. Se o texto nao permitir uma pergunta inequivoca, nao invente conteudo. Retorne somente JSON com propriedades enunciado, alternativas (array de 4 textos), indiceCorreto (0 a 3) e explicacao. Nao inclua raciocinio ou comentarios." },
                 new { role = "user", content = $"Crie uma questao de multipla escolha, fiel exclusivamente ao material a seguir. /no_think\n\n{textoDidatico}" }
             },
             options = new { num_predict = 400, num_ctx = 2048, temperature = 0.2 }
@@ -50,6 +50,7 @@ public sealed class OllamaQuestionService
         catch (JsonException ex) { throw new InvalidOperationException("Resposta da IA nao e um JSON valido.", ex); }
 
         if (questao is null || string.IsNullOrWhiteSpace(questao.Enunciado) ||
+            !questao.Enunciado.TrimEnd().EndsWith('?') ||
             questao.Alternativas is not { Length: 4 } ||
             questao.Alternativas.Any(string.IsNullOrWhiteSpace) ||
             questao.Alternativas.Distinct(StringComparer.OrdinalIgnoreCase).Count() != 4 ||
