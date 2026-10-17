@@ -1,5 +1,6 @@
 using DesafioBenjamin.Data;
 using DesafioBenjamin.Services.OCR;
+using DesafioBenjamin.Services.IA;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IOcrService, TesseractOcrService>();
+builder.Services.AddHttpClient<OllamaQuestionService>();
 
 var app = builder.Build();
 
