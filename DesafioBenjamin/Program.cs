@@ -2,11 +2,15 @@ using DesafioBenjamin.Data;
 using DesafioBenjamin.Services.OCR;
 using DesafioBenjamin.Services.IA;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        // Coluna Ativa adicionada de forma idempotente no DbInitializer.
+        // Evita bloquear MigrateAsync antes da atualizacao aditiva da coluna.
+        .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)));
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IOcrService, TesseractOcrService>();
