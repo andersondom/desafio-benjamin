@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Laboratorio de IA";
+    var questao = ViewBag.QuestaoGerada as DesafioBenjamin.Services.IA.QuestaoGerada;
+    var texto = ViewBag.TextoDidatico as string ?? "";
+}
+<div class="container py-4">
+    <h1>Laboratorio de IA - revisao de questoes</h1>
+    <p class="text-muted">Ambiente local de testes. Nenhuma questao e salva ou publicada automaticamente.</p>
+    <form asp-controller="LaboratorioIa" asp-action="Gerar" method="post">
+        @Html.AntiForgeryToken()
+        <div class="mb-3">
+            <label for="textoDidatico" class="form-label">Trecho do material didatico</label>
+            <textarea id="textoDidatico" name="textoDidatico" class="form-control" rows="8" maxlength="12000" required>@texto</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Gerar rascunho para revisao</button>
+    </form>
+    @if (ViewBag.Erro is string erro)
+    {
+        <div class="alert alert-warning mt-4" role="alert">@erro</div>
+    }
+    @if (questao is not null)
+    {
+        <section class="card mt-4">
+            <div class="card-body">
+                <h2 class="h4">Rascunho nao aprovado</h2>
+                <p>@questao.Enunciado</p>
+                <ol type="A">
+                @for (var i = 0; i < questao.Alternativas.Length; i++)
+                {
+                    <li>@questao.Alternativas[i] @(i == questao.IndiceCorreto ? "(indicada como correta pela IA)" : "")</li>
+                }
+                </ol>
+                <p><strong>Explicacao proposta:</strong> @questao.Explicacao</p>
+                <p class="text-muted">Confira a fidelidade ao livro, a resposta correta e a clareza antes de qualquer uso.</p>
+            </div>
+        </section>
+    }
+</div>
