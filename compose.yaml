@@ -24,7 +24,7 @@ services:
     environment:
       OLLAMA_NUM_PARALLEL: "1"
       OLLAMA_MAX_LOADED_MODELS: "1"
-      OLLAMA_KEEP_ALIVE: "2m"
+      OLLAMA_KEEP_ALIVE: "0"
     volumes:
       - ollama-data:/root/.ollama
     restart: unless-stopped
