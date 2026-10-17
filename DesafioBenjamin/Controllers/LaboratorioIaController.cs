@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DesafioBenjamin.Controllers;
 
-// Local development preview only. No database writes or publishing.
+// Laboratorio de uso local. Exige autenticacao antes de qualquer implantacao publica.
 [Route("laboratorio-ia")]
 public sealed class LaboratorioIaController : Controller
 {
@@ -75,6 +75,75 @@ public sealed class LaboratorioIaController : Controller
         return View(questoes);
     }
 
+
+    private static string Normalizar(string texto) =>
+        string.Join(" ", texto.Trim().ToUpperInvariant().Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+
+    [HttpGet("editar/{id:int}")]
+    public async Task<IActionResult> Editar(int id)
+    {
+        if (!IsLocalRequest()) return NotFound();
+        var questao = await _db.Questoes.AsNoTracking().Include(q => q.Alternativas)
+            .Include(q => q.Questionario).FirstOrDefaultAsync(q => q.Id == id);
+        if (questao is null) return NotFound();
+        ViewBag.Utilizada = await _db.TentativaQuestoes.AnyAsync(t => t.QuestaoId == id);
+        return View(questao);
+    }
+
+    [HttpPost("editar/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SalvarEdicao(int id, string enunciado, string[] alternativas, int indiceCorreto, string explicacao)
+    {
+        if (!IsLocalRequest()) return NotFound();
+        var questao = await _db.Questoes.Include(q => q.Alternativas).FirstOrDefaultAsync(q => q.Id == id);
+        if (questao is null) return NotFound();
+        if (await _db.TentativaQuestoes.AnyAsync(t => t.QuestaoId == id))
+        {
+            TempData["Erro"] = "Questao utilizada em partida: edicao bloqueada para preservar o historico. Desative-a e cadastre uma versao corrigida.";
+            return RedirectToAction(nameof(Editar), new { id });
+        }
+        if (string.IsNullOrWhiteSpace(enunciado) || !enunciado.TrimEnd().EndsWith('?') ||
+            alternativas is not { Length: 4 } || alternativas.Any(string.IsNullOrWhiteSpace) ||
+            alternativas.Select(Normalizar).Distinct().Count() != 4 ||
+            indiceCorreto is < 0 or > 3 || string.IsNullOrWhiteSpace(explicacao) ||
+            questao.Alternativas.Count != 4)
+        {
+            TempData["Erro"] = "Preencha uma pergunta, quatro alternativas distintas e a explicacao.";
+            return RedirectToAction(nameof(Editar), new { id });
+        }
+        var duplicada = await _db.Questoes.AsNoTracking().AnyAsync(q =>
+            q.Id != id && q.QuestionarioId == questao.QuestionarioId && q.Enunciado.Trim().ToUpper() == enunciado.Trim().ToUpper());
+        if (duplicada)
+        {
+            TempData["Erro"] = "Ja existe uma questao com este enunciado no questionario.";
+            return RedirectToAction(nameof(Editar), new { id });
+        }
+        questao.Enunciado = enunciado.Trim();
+        questao.Explicacao = explicacao.Trim();
+        var existentes = questao.Alternativas.OrderBy(a => a.Id).ToArray();
+        for (var i = 0; i < 4; i++)
+        {
+            existentes[i].Texto = alternativas[i].Trim();
+            existentes[i].Correta = i == indiceCorreto;
+        }
+        await _db.SaveChangesAsync();
+        TempData["Sucesso"] = "Questao atualizada com sucesso.";
+        return RedirectToAction(nameof(Aprovadas), new { questionarioId = questao.QuestionarioId });
+    }
+
+    [HttpPost("alternar/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Alternar(int id)
+    {
+        if (!IsLocalRequest()) return NotFound();
+        var questao = await _db.Questoes.FindAsync(id);
+        if (questao is null) return NotFound();
+        questao.Ativa = !questao.Ativa;
+        await _db.SaveChangesAsync();
+        TempData["Sucesso"] = questao.Ativa ? "Questao reativada." : "Questao desativada para novas partidas; historico preservado.";
+        return RedirectToAction(nameof(Aprovadas), new { questionarioId = questao.QuestionarioId });
+    }
+
     [HttpPost("aprovar")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Aprovar(int questionarioId, string enunciado, string[] alternativas, int indiceCorreto, string explicacao, bool revisado)
@@ -82,7 +151,7 @@ public sealed class LaboratorioIaController : Controller
         if (!IsLocalRequest()) return NotFound();
         if (!revisado || string.IsNullOrWhiteSpace(enunciado) || !enunciado.TrimEnd().EndsWith('?') ||
             alternativas is not { Length: 4 } || alternativas.Any(string.IsNullOrWhiteSpace) ||
-            alternativas.Distinct(StringComparer.OrdinalIgnoreCase).Count() != 4 ||
+            alternativas.Select(Normalizar).Distinct().Count() != 4 ||
             indiceCorreto is < 0 or > 3 || string.IsNullOrWhiteSpace(explicacao))
         {
             ViewBag.Erro = "Revise os campos, confirme a conferencia e escolha uma unica resposta correta.";
@@ -92,6 +161,12 @@ public sealed class LaboratorioIaController : Controller
         if (questionario is null)
         {
             ViewBag.Erro = "Questionario nao encontrado ou inativo.";
+            return await RevisaoAsync();
+        }
+        var jaExiste = await _db.Questoes.AsNoTracking().AnyAsync(q => q.QuestionarioId == questionario.Id && q.Enunciado.Trim().ToUpper() == enunciado.Trim().ToUpper());
+        if (jaExiste)
+        {
+            ViewBag.Erro = "Ja existe uma questao com este enunciado no questionario. Nenhuma duplicata foi salva.";
             return await RevisaoAsync();
         }
         var questao = new Questao
