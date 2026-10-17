@@ -58,6 +58,23 @@ public sealed class LaboratorioIaController : Controller
         return View("Index");
     }
 
+    [HttpGet("aprovadas")]
+    public async Task<IActionResult> Aprovadas(int? questionarioId)
+    {
+        if (!IsLocalRequest()) return NotFound();
+        var questionarios = await _db.Questionarios.AsNoTracking().OrderBy(q => q.Titulo).ToListAsync();
+        ViewBag.Questionarios = questionarios;
+        ViewBag.QuestionarioId = questionarioId;
+        var query = _db.Questoes.AsNoTracking()
+            .Include(q => q.Alternativas)
+            .Include(q => q.Questionario)
+            .AsQueryable();
+        if (questionarioId.HasValue)
+            query = query.Where(q => q.QuestionarioId == questionarioId.Value);
+        var questoes = await query.OrderByDescending(q => q.Id).Take(100).ToListAsync();
+        return View(questoes);
+    }
+
     [HttpPost("aprovar")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Aprovar(int questionarioId, string enunciado, string[] alternativas, int indiceCorreto, string explicacao, bool revisado)
