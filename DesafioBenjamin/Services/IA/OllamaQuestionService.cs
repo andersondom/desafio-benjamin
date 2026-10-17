@@ -28,6 +28,7 @@ public sealed class OllamaQuestionService
         {
             model = _model,
             stream = false,
+            keep_alive = 0,
             think = false,
             format = "json",
             messages = new object[]
