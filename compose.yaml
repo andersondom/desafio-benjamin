@@ -18,6 +18,8 @@ services:
     restart: unless-stopped
   ollama:
     image: ollama/ollama:latest
+    ports:
+      - "127.0.0.1:11434:11434"
     environment:
       OLLAMA_NUM_PARALLEL: "1"
       OLLAMA_MAX_LOADED_MODELS: "1"
@@ -26,6 +28,7 @@ services:
       - ollama-data:/root/.ollama
     restart: unless-stopped
     # CPU-first: NVIDIA MX250 with 2 GB VRAM is not targeted for GPU offload.
+    # API bound to localhost only; never expose to the public internet.
 volumes:
   app-data:
   materials:
