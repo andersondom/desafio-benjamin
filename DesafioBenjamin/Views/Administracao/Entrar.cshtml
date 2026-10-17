@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Acesso administrativo";
+    var returnUrl = ViewBag.ReturnUrl as string ?? "/laboratorio-ia";
+}
+<div class="container py-4" style="max-width:520px">
+    <h1 class="h3 mb-3">Acesso do responsavel</h1>
+    <p class="text-muted">Area reservada a revisao e administracao das questoes. O jogo do Benjamin permanece independente.</p>
+    @if (ViewBag.Configurado is false)
+    {
+        <div class="alert alert-warning">O acesso ainda nao foi configurado. Defina ADMIN_USER e ADMIN_PASSWORD (minimo de 12 caracteres) no ambiente do container web.</div>
+    }
+    @if (ViewBag.Erro is string erro)
+    {
+        <div class="alert alert-danger" role="alert">@erro</div>
+    }
+    <form method="post" action="/administracao/entrar">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <div class="mb-3"><label for="usuario" class="form-label">Usuario</label><input id="usuario" name="usuario" class="form-control" autocomplete="username" required /></div>
+        <div class="mb-3"><label for="senha" class="form-label">Senha</label><input id="senha" name="senha" type="password" class="form-control" autocomplete="current-password" required /></div>
+        <button type="submit" class="btn btn-primary">Entrar</button>
+    </form>
+</div>
