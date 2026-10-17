@@ -10,22 +10,22 @@
     var letras = new[] { "A", "B", "C", "D" };
 }
 
-<div class="container py-4" style="max-width:800px">
+<div class="container py-4 benjamin-game" style="max-width:850px">
     <div class="d-flex justify-content-between mb-3">
         <span>@tentativa?.Questionario.Disciplina.Icone @tentativa?.Questionario.Disciplina.Nome</span>
         <span>🎯 Desafio #@tentativa?.Id</span>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 benjamin-question-card">
         <div class="card-body p-4 p-md-5">
             <div class="d-flex justify-content-between mb-2">
                 <span class="fw-bold">❓ Pergunta @ordem de @tentativa?.TotalQuestoes</span>
-                <span class="text-muted">🎯 @tentativa?.TotalAcertos acertos</span>
+                <span class="text-muted">⭐ @tentativa?.TotalAcertos acertos</span>
             </div>
 
             <div class="progress mb-4" style="height:10px">
                 <div class="progress-bar bg-success" role="progressbar"
-                     style="width:@((ordem * 100) / tentativa!.TotalQuestoes)%"></div>
+                     aria-valuenow="@((ordem - 1 + (resposta is null ? 0 : 1)) * 100 / tentativa!.TotalQuestoes)" aria-valuemin="0" aria-valuemax="100" style="width:@((ordem - 1 + (resposta is null ? 0 : 1)) * 100 / tentativa.TotalQuestoes)%"></div>
             </div>
 
             <h2 class="fw-bold mb-4">@Model.Enunciado</h2>
@@ -42,7 +42,7 @@
                         {
                             var alternativa = Model.Alternativas[i];
                             <button type="submit" name="alternativaId" value="@alternativa.Id"
-                                    class="btn btn-outline-primary btn-lg text-start">
+                                    class="btn btn-outline-primary btn-lg text-start benjamin-answer">
                                 <strong>@letras[i])</strong> @alternativa.Texto
                             </button>
                         }
@@ -52,10 +52,11 @@
             else
             {
                 var acertou = resposta.Acertou;
-                <div class="alert @(acertou ? "alert-success" : "alert-warning") mt-3">
+                <div class="alert @(acertou ? "alert-success" : "alert-warning") mt-3" role="status" aria-live="polite">
                     <h4 class="alert-heading fw-bold">
                         @(acertou ? "🎉 Acertou, Benjamin!" : "📚 Quase! Vamos aprender essa juntos.")
                     </h4>
+                    <p class="mb-2"><strong>Sua resposta:</strong> @resposta.AlternativaSelecionada.Texto</p>
                     @if (!acertou)
                     {
                         var correta = Model.Alternativas.First(a => a.Id == corretaId);
@@ -83,6 +84,6 @@
 
     @if (resposta == null)
     {
-        <div class="text-center text-muted mt-4">💡 Leia com atenção antes de responder.</div>
+        <div class="text-center text-muted mt-4">💡 Leia com atenção antes de responder. Você consegue!</div>
     }
 </div>
