@@ -151,6 +151,15 @@ public sealed class LaboratorioIaController : Controller
     public async Task<IActionResult> Aprovar(int questionarioId, string enunciado, string[] alternativas, int indiceCorreto, string explicacao, bool revisado)
     {
         if (!IsLocalRequest()) return NotFound();
+        // Preserve os campos editados em qualquer falha de validacao.
+        ViewBag.QuestaoGerada = new QuestaoGerada
+        {
+            Enunciado = enunciado ?? "",
+            Alternativas = alternativas ?? Array.Empty<string>(),
+            IndiceCorreto = indiceCorreto,
+            Explicacao = explicacao ?? ""
+        };
+        ViewBag.QuestionarioSelecionado = questionarioId;
         if (!revisado || string.IsNullOrWhiteSpace(enunciado) || !enunciado.TrimEnd().EndsWith('?') ||
             alternativas is not { Length: 4 } || alternativas.Any(string.IsNullOrWhiteSpace) ||
             alternativas.Select(Normalizar).Distinct().Count() != 4 ||
