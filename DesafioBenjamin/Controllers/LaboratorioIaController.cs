@@ -111,8 +111,10 @@ public sealed class LaboratorioIaController : Controller
             TempData["Erro"] = "Preencha uma pergunta, quatro alternativas distintas e a explicacao.";
             return RedirectToAction(nameof(Editar), new { id });
         }
-        var duplicada = await _db.Questoes.AsNoTracking().AnyAsync(q =>
-            q.Id != id && q.QuestionarioId == questao.QuestionarioId && q.Enunciado.Trim().ToUpper() == enunciado.Trim().ToUpper());
+        var enunciadosExistentes = await _db.Questoes.AsNoTracking()
+            .Where(q => q.Id != id && q.QuestionarioId == questao.QuestionarioId)
+            .Select(q => q.Enunciado).ToListAsync();
+        var duplicada = enunciadosExistentes.Any(e => Normalizar(e) == Normalizar(enunciado));
         if (duplicada)
         {
             TempData["Erro"] = "Ja existe uma questao com este enunciado no questionario.";
@@ -163,7 +165,10 @@ public sealed class LaboratorioIaController : Controller
             ViewBag.Erro = "Questionario nao encontrado ou inativo.";
             return await RevisaoAsync();
         }
-        var jaExiste = await _db.Questoes.AsNoTracking().AnyAsync(q => q.QuestionarioId == questionario.Id && q.Enunciado.Trim().ToUpper() == enunciado.Trim().ToUpper());
+        var enunciadosExistentes = await _db.Questoes.AsNoTracking()
+            .Where(q => q.QuestionarioId == questionario.Id)
+            .Select(q => q.Enunciado).ToListAsync();
+        var jaExiste = enunciadosExistentes.Any(e => Normalizar(e) == Normalizar(enunciado));
         if (jaExiste)
         {
             ViewBag.Erro = "Ja existe uma questao com este enunciado no questionario. Nenhuma duplicata foi salva.";
