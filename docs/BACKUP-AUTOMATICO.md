@@ -34,3 +34,12 @@ Usar o Agendador de Tarefas do Windows:
 6. Executar manualmente a tarefa uma vez e conferir `resultado.txt`.
 
 Não ativar a tarefa antes de verificar o caminho real do script e testar com sucesso. Nunca colocar credenciais administrativas ou `.env` no agendamento.
+
+
+## Homologação do agendamento — 19/10/2026
+
+- Backup manual com script corrigido: sucesso às 15:57; SQLite `integrity_check: ok`, arquivo `desafio-benjamin.db` de 118784 bytes, `materiais.tar.gz` de 87 bytes, `SHA256.txt` e `resultado.txt` gerados.
+- Tarefa do Agendador do Windows: `Desafio Benjamin - Backup Diario`.
+- Consulta `Get-ScheduledTaskInfo` informada pelo operador: `LastRunTime=19/10/2026 15:58:37`, `LastTaskResult=0`, `NextRunTime=20/10/2026 03:00:00`.
+- Estado: agendamento registrado e execução informada como bem-sucedida pelo Windows. A verificação do `resultado.txt` e dos arquivos dessa execução agendada ainda é recomendada; não confundir sucesso do Agendador com inspeção do conteúdo do backup.
+- Os backups manuais, volumes Docker e Ollama permanecem fora do escopo da retenção automática.
