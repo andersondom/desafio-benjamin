@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,29 +11,36 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3" aria-label="Navegação principal">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">DesafioBenjamin</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">🤖 Desafio Benjamin 2.0</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuBenjamin"
+                        aria-controls="menuBenjamin" aria-expanded="false" aria-label="Abrir menu de navegação">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                <div class="collapse navbar-collapse" id="menuBenjamin">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Início e desafios</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="RevisaoInteligente" asp-action="Index">🧠 Revisão inteligente</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="menuAdministracao" role="button" data-bs-toggle="dropdown" aria-expanded="false">⚙️ Administração</a>
+                            <ul class="dropdown-menu" aria-labelledby="menuAdministracao">
+                                <li><a class="dropdown-item" href="/laboratorio-ia">🤖 Laboratório de IA</a></li>
+                                <li><a class="dropdown-item" href="/laboratorio-ia/aprovadas">📚 Questões aprovadas</a></li>
+                                <li><a class="dropdown-item" href="/painel-pedagogico">📊 Painel pedagógico</a></li>
+                            </ul>
                         </li>
                     </ul>
                     @if (User.IsInRole("Administrador"))
                     {
-                        <a asp-controller="PainelPedagogico" asp-action="Index" class="btn btn-outline-primary btn-sm me-2">📊 Painel pedagógico</a>
                         <form method="post" action="/administracao/sair" class="d-flex">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">Sair da administracao</button>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">🔒 Sair da administração</button>
                         </form>
+                    }
+                    else
+                    {
+                        <a href="/administracao/entrar" class="btn btn-outline-primary btn-sm">🔐 Entrar como administrador</a>
                     }
                 </div>
             </div>
