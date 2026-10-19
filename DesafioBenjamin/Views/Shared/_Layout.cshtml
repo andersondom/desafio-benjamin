@@ -19,28 +19,23 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="menuBenjamin">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-wrap">
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">🏠 Início e desafios</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="RevisaoInteligente" asp-action="Index">🧠 Revisão inteligente</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="menuAdministracao" role="button" data-bs-toggle="dropdown" aria-expanded="false">⚙️ Administração</a>
-                            <ul class="dropdown-menu" aria-labelledby="menuAdministracao">
-                                <li><a class="dropdown-item" href="/laboratorio-ia">🤖 Laboratório de IA</a></li>
-                                <li><a class="dropdown-item" href="/laboratorio-ia/aprovadas">📚 Questões aprovadas</a></li>
-                                <li><a class="dropdown-item" href="/painel-pedagogico">📊 Painel pedagógico</a></li>
-                            </ul>
-                        </li>
+                        <li class="nav-item"><a class="nav-link" href="/laboratorio-ia">🤖 Laboratório de IA</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/laboratorio-ia/aprovadas">📚 Questões aprovadas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/painel-pedagogico">📊 Painel pedagógico</a></li>
                     </ul>
                     @if (User.IsInRole("Administrador"))
                     {
                         <form method="post" action="/administracao/sair" class="d-flex">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">🔒 Sair da administração</button>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">🔒 Sair</button>
                         </form>
                     }
                     else
                     {
-                        <a href="/administracao/entrar" class="btn btn-outline-primary btn-sm">🔐 Entrar como administrador</a>
+                        <a href="/administracao/entrar" class="btn btn-outline-primary btn-sm">🔐 Administrador</a>
                     }
                 </div>
             </div>
