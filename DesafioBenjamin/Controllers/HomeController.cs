@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using DesafioBenjamin.Data;
 using DesafioBenjamin.Models;
+using DesafioBenjamin.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,11 +24,14 @@ public class HomeController : Controller
             .OrderBy(q => q.Disciplina.Nome)
             .ToListAsync();
 
-        ViewBag.TotalDesafios = await _context.Tentativas.CountAsync(t => t.FinalizadaEm != null);
-        ViewBag.TotalAcertos = await _context.Tentativas.SumAsync(t => (int?)t.TotalAcertos) ?? 0;
-        var totalQuestoes = await _context.Tentativas
-            .Where(t => t.FinalizadaEm != null)
-            .SumAsync(t => (int?)t.TotalQuestoes) ?? 0;
+        var historico = await _context.Tentativas.AsNoTracking()
+            .Where(t => t.FinalizadaEm != null && t.Aluno.Nome == "Benjamin")
+            .ToListAsync();
+        ViewBag.TotalDesafios = historico.Count;
+        ViewBag.Estrelas = historico.Sum(RecompensasService.Estrelas);
+        ViewBag.Conquistas = RecompensasService.Conquistas(historico);
+        ViewBag.TotalAcertos = historico.Sum(t => t.TotalAcertos);
+        var totalQuestoes = historico.Sum(t => t.TotalQuestoes);
         ViewBag.Aproveitamento = totalQuestoes == 0 ? 0 :
             Math.Round(ViewBag.TotalAcertos * 100.0 / totalQuestoes, 1);
 
