@@ -10,7 +10,7 @@ Registro de validação: 19/10/2026. Homologação funcional 8/8 aprovada. Não 
 - SHA-256 do arquivo de materiais: `716FF45D3726EB11E1C766E4C6F331AED1380228DC73256DD70A1EA8EBC08F53`.
 - `PRAGMA integrity_check` do banco **extraído da cópia**: `ok`.
 - Serviços web e ollama em execução na última checagem; contêiner temporário de verificação removido.
-- `PRAGMA table_list` foi executado com `r[0]`, mostrando nomes de esquemas (`main`/`temp`), **não** nomes das tabelas. Não há ainda prova de restauração funcional completa.
+- `PRAGMA table_list` foi executado com `r[0]`, mostrando nomes de esquemas (`main`/`temp`), **não** nomes das tabelas. A restauração funcional isolada foi homologada em 19/10/2026 (5/5 testes aprovados).
 
 Os arquivos de backup estão apenas na máquina local do operador e **não são versionados neste repositório**. Não subir backups, banco ou segredos ao GitHub.
 
@@ -44,3 +44,27 @@ docker rm -f benjamin-verifica-backup
 - Usar nomes com data e hora nos backups futuros para não sobrescrever cópias anteriores.
 - Não incluir o arquivo `.env` em repositórios ou registros de execução.
 - A verificação de integridade do SQLite não substitui ensaio de restauração e teste funcional.
+
+
+## Homologação da restauração isolada — 19/10/2026
+
+**Resultado: APROVADO — 5/5, sem observações.**
+
+1. O arquivo `backup-benjamin-dados.tar.gz` foi extraído para o volume independente `benjamin-teste-restauracao`. O SQLite retornou `PRAGMA integrity_check: ok` usando `mode=ro&immutable=1`.
+2. A estrutura foi identificada com `PRAGMA table_list`, incluindo `Alunos`, `Disciplinas`, `Questionarios`, `Questoes`, `Alternativas`, `Tentativas`, `TentativaQuestoes`, `Respostas`, além das tabelas de controle e internas.
+3. O contêiner de teste `benjamin-teste-web` foi iniciado com a imagem `desafio-benjamin-v2-web`, banco restaurado em `/app/data`, e porta local `127.0.0.1:8081`. Logs mostraram consultas EF Core executadas e aplicação iniciada.
+4. O operador confirmou: (i) página inicial acessível; (ii) menu correto; (iii) revisão inteligente acessível com informações; (iv) desafios e questionários anteriores disponíveis; (v) instância original funcionando em `127.0.0.1:8080`. Todos **funcionaram**.
+5. O encerramento seguro do teste foi orientado com `docker stop benjamin-teste-web` e `docker rm benjamin-teste-web`; **a execução desses dois comandos ainda depende de confirmação do operador**. O volume `benjamin-teste-restauracao` deve permanecer preservado até decisão posterior.
+
+Este ensaio confirma recuperação funcional **da cópia testada**. Não houve restauração nem substituição do banco original, merge, ou teste de recuperação de uma máquina completamente perdida.
+
+### Comandos de encerramento seguro
+
+```powershell
+docker stop benjamin-teste-web
+docker rm benjamin-teste-web
+docker ps --filter "name=benjamin-teste-web"
+docker compose -f ..\compose.yaml -p desafio-benjamin-v2 ps
+```
+
+Não remover volumes de produção nem executar `docker compose down -v`.
