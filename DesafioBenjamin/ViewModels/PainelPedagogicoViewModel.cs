@@ -1,0 +1,16 @@
+namespace DesafioBenjamin.ViewModels;
+
+public sealed class PainelPedagogicoViewModel
+{
+    public int TotalPartidas { get; init; }
+    public int TotalQuestoes { get; init; }
+    public int TotalAcertos { get; init; }
+    public double Aproveitamento { get; init; }
+    public List<DesempenhoDisciplina> Disciplinas { get; init; } = new();
+    public List<PartidaResumo> Historico { get; init; } = new();
+    public List<DificuldadeResumo> Dificuldades { get; init; } = new();
+}
+
+public sealed record DesempenhoDisciplina(string Nome, int Partidas, int Acertos, int Questoes, double Percentual);
+public sealed record PartidaResumo(int Id, DateTime Data, string Disciplina, string Questionario, string? Capitulo, int Acertos, int Questoes, double Percentual);
+public sealed record DificuldadeResumo(string Disciplina, string? Capitulo, string Questao, int Erros, int Respostas, double PercentualErros);
