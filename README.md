@@ -60,4 +60,4 @@ Guarde o arquivo de backup em local seguro. Faça backup separado dos materiais 
 
 ## Estado de entrega
 
-A implementação de navegação e configuração foi enviada à branch `feat/infra-gratuita-v2`. A homologação desta consolidação no Docker local ainda é necessária antes de classificar a versão como estável.
+**Versão estável homologada funcionalmente em 19/10/2026**, na branch `feat/infra-gratuita-v2`, sem merge. O usuário confirmou 8 de 8 verificações: menu completo, acesso público, autenticação do laboratório, retorno ao destino após login, proteção e redirecionamento das áreas administrativas, logout, menu responsivo e preservação de desafios e histórico. Sem observações. Esta aprovação se refere ao ambiente Docker local testado pelo usuário; não equivale a auditoria independente de segurança ou testes automatizados de regressão. Não executar merge sem autorização explícita.
