@@ -300,3 +300,27 @@ body {
     .benjamin-answer, .benjamin-game .progress-bar { transition: none; }
     .benjamin-answer:hover { transform: none; }
 }
+
+/* Personagem e celebracoes: animacoes apenas decorativas, sem dependencias. */
+.benjamin-mascot { position: relative; display: inline-block; animation: mascot-float 3.5s ease-in-out infinite; }
+.mascot-sparkle { position: absolute; right: -10px; top: 0; font-size: 2rem; animation: sparkle-pop 2.5s ease-in-out infinite; }
+.benjamin-entrance { animation: card-appear .55s ease-out both; }
+.benjamin-companion { display: flex; align-items: center; gap: .85rem; padding: .85rem 1rem; margin-bottom: 1.25rem; background: #eef2ff; color: #312e81; border-radius: 16px; font-weight: 700; }
+.benjamin-companion-icon { font-size: 2.2rem; line-height: 1; }
+.benjamin-feedback { animation: card-appear .4s ease-out both; border-radius: 16px; }
+.benjamin-result-card { border-radius: 26px; overflow: hidden; animation: card-appear .5s ease-out both; }
+.benjamin-celebration { display: flex; justify-content: center; align-items: center; gap: 1.25rem; font-size: 2.5rem; }
+.benjamin-celebration > span:first-child { animation: sparkle-pop 1.6s ease-in-out 2; }
+.benjamin-celebration > span:last-child { animation: sparkle-pop 1.6s ease-in-out .35s 2; }
+.benjamin-result-mascot { font-size: 4rem; animation: mascot-float 2s ease-in-out 2; }
+.benjamin-result-trophy { font-size: 4rem; }
+.benjamin-earned-stars { display: inline-block; animation: stars-reveal .7s ease-out both; }
+@keyframes mascot-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes sparkle-pop { 0%, 100% { transform: scale(.85) rotate(-8deg); opacity: .75; } 50% { transform: scale(1.15) rotate(8deg); opacity: 1; } }
+@keyframes card-appear { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes stars-reveal { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .benjamin-mascot, .mascot-sparkle, .benjamin-entrance, .benjamin-feedback,
+  .benjamin-result-card, .benjamin-celebration > span, .benjamin-result-mascot,
+  .benjamin-earned-stars { animation: none !important; }
+}
