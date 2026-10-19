@@ -28,6 +28,7 @@
                      aria-valuenow="@((ordem - 1 + (resposta is null ? 0 : 1)) * 100 / tentativa!.TotalQuestoes)" aria-valuemin="0" aria-valuemax="100" style="width:@((ordem - 1 + (resposta is null ? 0 : 1)) * 100 / tentativa.TotalQuestoes)%"></div>
             </div>
 
+            <div class="benjamin-companion" aria-label="Companheiro de estudos"><span class="benjamin-companion-icon" aria-hidden="true">🤖</span><span>@(resposta is null ? "Estou torcendo por você!" : resposta.Acertou ? "Uau! Você mandou bem!" : "Boa tentativa! Aprender é evoluir!")</span></div>
             <h2 class="fw-bold mb-4">@Model.Enunciado</h2>
 
             @if (resposta == null)
@@ -52,7 +53,7 @@
             else
             {
                 var acertou = resposta.Acertou;
-                <div class="alert @(acertou ? "alert-success" : "alert-warning") mt-3" role="status" aria-live="polite">
+                <div class="alert @(acertou ? "alert-success" : "alert-warning") mt-3 benjamin-feedback" role="status" aria-live="polite">
                     <h4 class="alert-heading fw-bold">
                         @(acertou ? "🎉 Acertou, Benjamin!" : "📚 Quase! Vamos aprender essa juntos.")
                     </h4>
