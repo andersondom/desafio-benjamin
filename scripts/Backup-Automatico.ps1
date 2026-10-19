@@ -39,11 +39,12 @@ try {
     # SQLite online backup API: consistent snapshot while the app keeps running.
     # Source is mounted read-write to permit SQLite WAL/shared-memory coordination.
     # No data-changing SQL is issued. Output is written to the backup directory.
-    $python = 'import sqlite3,os; s=sqlite3.connect("file:/source/desafio-benjamin.db?mode=ro",uri=True,timeout=30); d=sqlite3.connect("/output/desafio-benjamin.db"); s.backup(d,pages=100,sleep=0.1); print("integrity_check:",d.execute("PRAGMA integrity_check").fetchone()[0]); d.close(); s.close()'
+    # Avoid double quotes inside python -c: Windows PowerShell/Docker CLI can strip them.
+    $python = "import sqlite3; s=sqlite3.connect('file:/source/desafio-benjamin.db?mode=ro',uri=True,timeout=30); d=sqlite3.connect('/output/desafio-benjamin.db'); s.backup(d,pages=100,sleep=0.1); v=d.execute('PRAGMA integrity_check').fetchone()[0]; print('integrity_check:',v); d.close(); s.close(); assert v=='ok'"
     DockerRun @('run','--rm','--mount',"type=volume,source=$appVolume,target=/source",'--mount',"type=bind,source=$runDir,target=/output",'python:3.12-alpine','python','-c',$python)
     $dbFile = Join-Path $runDir 'desafio-benjamin.db'
     if (!(Test-Path -LiteralPath $dbFile) -or (Get-Item $dbFile).Length -le 0) { throw 'Copia SQLite ausente ou vazia.' }
-    $verify = 'import sqlite3; c=sqlite3.connect("file:/output/desafio-benjamin.db?mode=ro&immutable=1",uri=True); v=c.execute("PRAGMA integrity_check").fetchone()[0]; print(v); c.close(); assert v=="ok"'
+    $verify = "import sqlite3; c=sqlite3.connect('file:/output/desafio-benjamin.db?mode=ro&immutable=1',uri=True); v=c.execute('PRAGMA integrity_check').fetchone()[0]; print(v); c.close(); assert v=='ok'"
     DockerRun @('run','--rm','--mount',"type=bind,source=$runDir,target=/output,readonly",'python:3.12-alpine','python','-c',$verify)
     # Tar materials into the same host directory. Does not touch source volume.
     DockerRun @('run','--rm','--mount',"type=volume,source=$materialsVolume,target=/materials,readonly",'--mount',"type=bind,source=$runDir,target=/output",'alpine','sh','-c','cd /materials && tar -czf /output/materiais.tar.gz . && tar -tzf /output/materiais.tar.gz >/dev/null')
