@@ -11,6 +11,8 @@ services:
       Ollama__BaseUrl: http://ollama:11434
       Ollama__Model: qwen3:4b
       LABORATORIO_IA_LOCAL: "true"
+      ADMIN_USER: ${ADMIN_USER:?Configure ADMIN_USER no arquivo .env local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configure ADMIN_PASSWORD no arquivo .env local}
     volumes:
       - app-data:/app/data
       - materials:/app/materials
