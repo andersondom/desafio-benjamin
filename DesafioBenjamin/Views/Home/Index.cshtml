@@ -18,6 +18,26 @@
         <div class="resumo-card"><span>🔥</span><div><strong>@ViewBag.TotalAcertos</strong><small>Acertos</small></div></div>
     </section>
 
+    <section class="card shadow-sm border-0 mt-4" aria-label="Minhas recompensas">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold">🌟 Minhas recompensas</h2>
+            <p class="mb-2"><strong>⭐ @ViewBag.Estrelas estrelas</strong> conquistadas em desafios concluídos</p>
+            @if (((IReadOnlyList<string>)ViewBag.Conquistas).Count == 0)
+            {
+                <p class="text-muted mb-0">Sua primeira conquista está esperando por você!</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var conquista in (IReadOnlyList<string>)ViewBag.Conquistas)
+                    {
+                        <li class="py-1">@conquista</li>
+                    }
+                </ul>
+            }
+        </div>
+    </section>
+
     <section class="disciplinas">
         <div class="titulo-secao"><div><h2>Meus desafios</h2><p>Escolha uma disciplina para começar.</p></div></div>
         <div class="grade-disciplinas">
