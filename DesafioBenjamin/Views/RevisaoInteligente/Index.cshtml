@@ -1,0 +1,43 @@
+@model List<DesafioBenjamin.Controllers.RevisaoInteligenteController.RevisaoOpcao>
+@{
+    ViewData["Title"] = "Revisão inteligente";
+}
+<div class="container py-4" style="max-width:900px">
+    <div class="card shadow-sm border-0 benjamin-question-card">
+        <div class="card-body p-4 p-md-5">
+            <div class="benjamin-companion"><span class="benjamin-companion-icon" aria-hidden="true">🤖</span><span>Vamos treinar o que ainda podemos melhorar, Benjamin!</span></div>
+            <h1 class="fw-bold">🧠 Revisão inteligente</h1>
+            <p class="text-muted">Escolha um conteúdo para revisar até 10 questões que já apresentaram dificuldades. As questões com mais erros aparecem primeiro.</p>
+            <p class="small text-muted">A revisão utiliza o mesmo jogo e registra uma nova partida. Seus resultados anteriores não são modificados.</p>
+            @if (TempData["RevisaoAviso"] is string aviso)
+            {
+                <div class="alert alert-info" role="status">@aviso</div>
+            }
+            @if (Model.Count == 0)
+            {
+                <div class="alert alert-success" role="status">Ainda não existem erros de partidas concluídas em questões disponíveis para revisão. Continue jogando os desafios! 🌟</div>
+            }
+            else
+            {
+                <div class="d-grid gap-3 mt-4">
+                    @foreach (var opcao in Model)
+                    {
+                        <div class="border rounded-4 p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <strong>@opcao.Disciplina — @opcao.Questionario</strong>
+                                <div class="text-muted small">@opcao.Capitulo</div>
+                                <div class="small">📚 @opcao.QuestoesComErros questões com erros registrados</div>
+                            </div>
+                            <form asp-controller="RevisaoInteligente" asp-action="Iniciar" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="questionarioId" value="@opcao.QuestionarioId" />
+                                <button type="submit" class="btn btn-success btn-lg">🚀 Revisar agora</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            }
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary mt-4">🏠 Voltar ao início</a>
+        </div>
+    </div>
+</div>
