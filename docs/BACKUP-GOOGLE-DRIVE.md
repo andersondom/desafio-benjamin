@@ -40,3 +40,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File ..\scripts\Backup-Cloud-
 O script envia somente backups locais que possuem `SUCESSO:` e os quatro arquivos exigidos. Arquivos já presentes no Drive não são sobrescritos nem apagados. Em caso de divergência, a execução falha para inspeção manual. **Atenção:** o arquivo `.partial` no Drive não é removido automaticamente se houver interrupção; investigar antes de tentar novamente.
 
 Após conferir arquivo no Google Drive pelo navegador e realizar um teste de recuperação, agendar tarefa separada após o backup local, com usuário Windows interativo e Google Drive ativo. Não agendar antes dessa validação.
+
+
+## Homologação da automação externa — 20/10/2026
+
+- Google Drive para computador: unidade `G:\Meu Drive`, com dois arquivos `.7z` copiados, SHA-256 local conferido e presença na nuvem confirmada pelo operador via navegador.
+- Extração com senha de recuperação: arquivos `desafio-benjamin.db`, `materiais.tar.gz`, `resultado.txt` e `SHA256.txt` presentes no diretório isolado. Não houve nova execução do `PRAGMA integrity_check` sobre o banco extraído nessa etapa.
+- Script `scripts/Agendar-Backup-Cloud.ps1` criou a tarefa `Desafio Benjamin - Backup Google Drive` para 03:30 diariamente, com usuário Windows interativo.
+- Execução manual agendada em 20/10/2026 às 08:54:38: resultado inicial `267009` (em execução), resultado final `0` (sucesso). Próxima execução indicada: 21/10/2026 às 03:30:00.
+- O resultado da tarefa não equivale à confirmação da sincronização de backups futuros: conferir periodicamente a pasta no navegador e testar recuperação.
+- Backups locais, volumes Docker, modelo Ollama e arquivos já existentes na nuvem não foram excluídos pela rotina.
