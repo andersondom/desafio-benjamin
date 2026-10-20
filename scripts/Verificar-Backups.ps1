@@ -1,7 +1,9 @@
 param(
     [string]$BackupRoot = '',
     [string]$CloudFolder = 'G:\Meu Drive\Desafio Benjamin 2.0\Backups Criptografados',
-    [int]$MaxAgeHours = 30
+    [int]$MaxAgeHours = 30,
+    [switch]$NotifyOnFailure,
+    [switch]$TestNotification
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
@@ -11,6 +13,29 @@ $logDir = Join-Path $repo 'backups\monitoramento'
 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
 $log = Join-Path $logDir ('verificacao-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.txt')
 $issues = New-Object System.Collections.Generic.List[string]
+function Show-BackupAlert([string]$message) {
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        Add-Type -AssemblyName System.Drawing
+        $notify = New-Object System.Windows.Forms.NotifyIcon
+        try {
+            $notify.Icon = [System.Drawing.SystemIcons]::Warning
+            $notify.Visible = $true
+            $notify.BalloonTipTitle = 'Desafio Benjamin - Backup com falha'
+            $notify.BalloonTipText = $message
+            $notify.BalloonTipIcon = [System.Windows.Forms.ToolTipIcon]::Warning
+            $notify.ShowBalloonTip(12000)
+            Start-Sleep -Seconds 13
+        } finally { $notify.Dispose() }
+    } catch {
+        Write-Warning ("Notificacao visual indisponivel: " + $_.Exception.Message)
+    }
+}
+if ($TestNotification) {
+    Show-BackupAlert 'TESTE: notificacao do monitor de backups. Nenhum problema real identificado.'
+    exit 0
+}
+
 function Check([bool]$condition,[string]$message) {
     if (!$condition) { $script:issues.Add($message) }
 }
@@ -60,5 +85,8 @@ $lines = @("$(Get-Date -Format o) STATUS=$state")
 if ($issues.Count) { $lines += $issues.ToArray() }
 $lines | Set-Content -LiteralPath $log -Encoding UTF8
 $lines | ForEach-Object { Write-Host $_ }
-if ($issues.Count) { exit 1 }
+if ($issues.Count) {
+    if ($NotifyOnFailure) { Show-BackupAlert (($issues | Select-Object -First 2) -join '; ') }
+    exit 1
+}
 exit 0
