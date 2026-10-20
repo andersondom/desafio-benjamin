@@ -17,16 +17,17 @@ function Show-BackupAlert([string]$message) {
     try {
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing
-        $notify = New-Object System.Windows.Forms.NotifyIcon
-        try {
-            $notify.Icon = [System.Drawing.SystemIcons]::Warning
-            $notify.Visible = $true
-            $notify.BalloonTipTitle = 'Desafio Benjamin - Backup com falha'
-            $notify.BalloonTipText = $message
-            $notify.BalloonTipIcon = [System.Windows.Forms.ToolTipIcon]::Warning
-            $notify.ShowBalloonTip(12000)
-            Start-Sleep -Seconds 13
-        } finally { $notify.Dispose() }
+        # A visible modal dialog is more reliable than a legacy tray balloon.
+        # It is used only for explicit interactive tests or real failures.
+        [System.Windows.Forms.MessageBox]::Show(
+            $message,
+            'Desafio Benjamin - Backup com falha',
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Warning,
+            [System.Windows.Forms.MessageBoxDefaultButton]::Button1,
+            [System.Windows.Forms.MessageBoxOptions]::DefaultDesktopOnly
+        ) | Out-Null
+        Write-Host 'NOTIFICACAO EXIBIDA: janela de alerta fechada pelo usuario.'
     } catch {
         Write-Warning ("Notificacao visual indisponivel: " + $_.Exception.Message)
     }
