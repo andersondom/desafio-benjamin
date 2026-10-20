@@ -35,7 +35,15 @@ if ($InitializePassword) {
 if (!(Test-Path -LiteralPath $credentialFile)) { throw 'Configure a senha primeiro usando -InitializePassword.' }
 if (!(Test-Path -LiteralPath $BackupRoot)) { throw 'Pasta local de backups nao encontrada.' }
 if (!(Test-Path -LiteralPath 'G:\Meu Drive')) { throw 'Google Drive G:\Meu Drive indisponivel. Nenhum arquivo sera removido.' }
-$secure = Get-Content -LiteralPath $credentialFile -Raw | ConvertTo-SecureString
+# Set-Content adds a newline; ConvertTo-SecureString requires only the DPAPI hex string.
+# Read one line rather than -Raw, which includes CR/LF and causes FormatException.
+$protectedText = Get-Content -LiteralPath $credentialFile -TotalCount 1 -ErrorAction Stop
+if ([string]::IsNullOrWhiteSpace($protectedText)) { throw 'Arquivo DPAPI vazio. Nao envie seu conteudo; solicite procedimento seguro de recuperacao.' }
+try {
+    $secure = ConvertTo-SecureString -String $protectedText.Trim() -ErrorAction Stop
+} catch {
+    throw 'Nao foi possivel abrir a credencial DPAPI. Confirme o mesmo usuario Windows; nao exclua a credencial nem backups existentes.'
+}
 $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try {
     $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
