@@ -8,6 +8,5 @@
   <ItemGroup>
     <Compile Include="../../DesafioBenjamin/Services/RecompensasService.cs" Link="RecompensasService.cs" />
     <Compile Include="../../DesafioBenjamin/Models/Tentativa.cs" Link="Tentativa.cs" />
-    <Compile Include="Stubs.cs" />
   </ItemGroup>
 </Project>
