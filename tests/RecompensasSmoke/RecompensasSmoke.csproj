@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../DesafioBenjamin/DesafioBenjamin.csproj" />
+    <Compile Include="../../DesafioBenjamin/Services/RecompensasService.cs" Link="RecompensasService.cs" />
+    <Compile Include="../../DesafioBenjamin/Models/Tentativa.cs" Link="Tentativa.cs" />
+    <Compile Include="Stubs.cs" />
   </ItemGroup>
 </Project>
