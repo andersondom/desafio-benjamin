@@ -25,6 +25,34 @@
             <div class="col-6 col-lg-3"><div class="card h-100 shadow-sm border-0"><div class="card-body"><div class="text-muted">⭐ Aproveitamento</div><strong class="fs-2">@Model.Aproveitamento.ToString("0.#")%</strong></div></div></div>
         </div>
 
+        <section class="card shadow-sm border-0 mb-4" aria-label="Plano de estudos sugerido">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">🧭 Por onde começar a estudar?</h2>
+                <p class="text-muted">Sugestões automáticas baseadas apenas nos erros registrados em partidas concluídas. Não são diagnósticos.</p>
+                @if (Model.Orientacoes.Count == 0)
+                {
+                    <p class="mb-0">Ainda não há erros registrados. Continue praticando para acompanhar sua evolução!</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var item in Model.Orientacoes)
+                        {
+                            <div class="col-md-6">
+                                <article class="border rounded p-3 h-100">
+                                    <span class="badge @(item.Prioridade == "Priorizar" ? "bg-warning text-dark" : "bg-secondary")">@item.Prioridade</span>
+                                    <h3 class="h6 fw-bold mt-2">@item.Disciplina @if (!string.IsNullOrWhiteSpace(item.Capitulo)) { <small class="text-muted">· @item.Capitulo</small> }</h3>
+                                    <p class="small mb-2">@item.Erros erros em @item.Respostas respostas registradas nesse conteúdo.</p>
+                                    <p class="mb-0">@item.Sugestao</p>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                    <a asp-controller="RevisaoInteligente" asp-action="Index" class="btn btn-success mt-3">🧠 Abrir revisão inteligente</a>
+                }
+            </div>
+        </section>
+
         <section class="card shadow-sm border-0 mb-4">
             <div class="card-body p-4">
                 <h2 class="h4 fw-bold mb-3">📚 Aproveitamento por disciplina</h2>
