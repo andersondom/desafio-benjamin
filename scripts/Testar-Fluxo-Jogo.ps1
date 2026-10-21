@@ -14,6 +14,8 @@ $checks = [ordered]@{
     'Responder impede pontuacao duplicada' = $source.Contains('if (!jaRespondida)')
     'Proxima exige resposta anterior' = $source.Contains('if (!respondeu)')
     'Proxima registra conclusao' = $source.Contains('tentativa.FinalizadaEm = DateTime.Now')
+    'Proxima impede conclusao prematura' = $source.Contains('questoesRespondidas < tentativa.TotalQuestoes')
+    'Proxima impede nova finalizacao' = $source.Contains('if (tentativa.FinalizadaEm != null)')
     'Resultado bloqueia tentativa incompleta' = $source.Contains('if (tentativa.FinalizadaEm == null)')
 }
 $failed = 0
@@ -30,5 +32,5 @@ try {
     $failed++
 }
 if ($failed) { throw "$failed verificacao(oes) falharam." }
-Write-Host 'APROVADO: 11 verificacoes de contrato do fluxo e disponibilidade.'
+Write-Host 'APROVADO: 13 verificacoes de contrato do fluxo e disponibilidade.'
 Write-Host 'NOTA: verificacoes estaticas + HTTP GET; nao simulam partidas reais nem gravam dados.'
