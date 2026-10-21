@@ -4,6 +4,9 @@ $containerName = 'benjamin-teste-isolado-' + [guid]::NewGuid().ToString('N').Sub
 $temp = Join-Path $env:TEMP ('benjamin-e2e-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temp -Force | Out-Null
 $base = "http://127.0.0.1:$Port"
+$repo = Split-Path $PSScriptRoot -Parent
+$imageTag = 'desafio-benjamin-e2e:' + [guid]::NewGuid().ToString('N').Substring(0,12)
+$imageBuilt = $false
 $steps = 0
 function Assert([bool]$condition, [string]$message) {
     if (!$condition) { throw "FALHA: $message" }
@@ -19,6 +22,10 @@ function PostForm([string]$url,[hashtable]$data) {
     return Invoke-WebRequest -Uri ($base + $url) -Method Post -Body $data -WebSession $script:session -UseBasicParsing -MaximumRedirection 10 -TimeoutSec 30
 }
 try {
+    Write-Host 'Construindo imagem temporaria a partir do codigo atual (sem atualizar o aplicativo principal)...'
+    & docker build --tag $imageTag --file (Join-Path $repo 'docker/Dockerfile') $repo
+    if ($LASTEXITCODE -ne 0) { throw 'Falha ao construir imagem de teste a partir do codigo atual.' }
+    $imageBuilt = $true
     Write-Host 'Iniciando aplicacao em container temporario com SQLite vazio e isolado...'
     $mount = 'type=bind,source=' + $temp + ',target=/app/data'
     $args = @('run','-d','--rm','--name',$containerName,'-p',"127.0.0.1:$($Port):8080",'--mount',$mount,
@@ -26,7 +33,7 @@ try {
       '-e','ConnectionStrings__DefaultConnection=Data Source=/app/data/teste.db',
       '-e','ADMIN_USER=teste-isolado',
       '-e','ADMIN_PASSWORD=SenhaDeTesteSomenteAqui2026!',
-      '--network','bridge','desafio-benjamin-v2-web:latest')
+      '--network','bridge',$imageTag)
     $id = & docker @args
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel iniciar o container isolado.' }
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
@@ -106,6 +113,7 @@ try {
     throw
 } finally {
     & docker rm -f $containerName 2>$null | Out-Null
+    if ($imageBuilt) { & docker image rm $imageTag 2>$null | Out-Null }
     Remove-Item -LiteralPath $temp -Recurse -Force -ErrorAction SilentlyContinue
     Write-Host 'Ambiente temporario removido; dados reais preservados.'
 }
