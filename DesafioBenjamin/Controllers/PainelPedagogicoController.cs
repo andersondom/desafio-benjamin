@@ -67,14 +67,12 @@ public sealed class PainelPedagogicoController : Controller
                 return new EvolucaoDisciplina(g.Key, delta, n);
             }).OrderBy(x => x.Nome).ToList();
 
-        var historicoSemanal = await _context.Tentativas.AsNoTracking()
-            .Where(t => t.Aluno.Nome == "Benjamin" && t.FinalizadaEm != null)
-            .Select(t => new DesafioBenjamin.Models.Tentativa
+        var semana = ProgressoSemanalService.Calcular(
+            partidas.Select(t => new DesafioBenjamin.Models.Tentativa
             {
                 FinalizadaEm = t.FinalizadaEm,
                 TotalAcertos = t.TotalAcertos
-            }).ToListAsync();
-        var semana = ProgressoSemanalService.Calcular(historicoSemanal, DateTime.Now);
+            }), DateTime.Now);
 
         var disciplinas = partidas
             .GroupBy(t => t.Disciplina)
