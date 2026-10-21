@@ -24,4 +24,23 @@ Check(RecompensasService.Medalha(Finished(10, 10)).Contains("ouro"), "Medalha ou
 Check(RecompensasService.Conquistas(new [] { Finished(10, 10) }).Count == 3, "Primeira partida perfeita concede 3 conquistas");
 Check(RecompensasService.Conquistas(Enumerable.Range(0, 5).Select(_ => Finished(1, 10))).Count == 2, "Conquista 5 partidas");
 Check(RecompensasService.Conquistas(Enumerable.Range(0, 10).Select(_ => Finished(1, 10))).Count == 3, "Conquista 10 partidas");
-Console.WriteLine("APROVADO: 10 verificacoes de recompensas.");
+// Check real entity relationships without a database or external packages.
+var question = new Questao { Id = 11, Enunciado = "Quanto e 2 + 2?", Ordem = 1 };
+var correct = new Alternativa { Id = 101, QuestaoId = question.Id, Questao = question, Texto = "4", Correta = true };
+var wrong = new Alternativa { Id = 102, QuestaoId = question.Id, Questao = question, Texto = "5", Correta = false };
+question.Alternativas.AddRange(new[] { correct, wrong });
+Check(question.Alternativas.Count == 2 && question.Alternativas.Count(a => a.Correta) == 1, "Questao com duas alternativas e uma correta");
+var attempt = Finished(1, 1);
+attempt.Id = 7;
+attempt.Questoes.Add(new TentativaQuestao { TentativaId = attempt.Id, Tentativa = attempt, QuestaoId = question.Id, Questao = question, Ordem = 1 });
+Check(attempt.Questoes.Single().QuestaoId == question.Id && attempt.Questoes.Single().Ordem == 1, "Ordem e vinculo da questao na tentativa");
+attempt.Respostas.Add(new Resposta { TentativaId = attempt.Id, Tentativa = attempt, QuestaoId = question.Id, Questao = question, AlternativaSelecionadaId = correct.Id, AlternativaSelecionada = correct, Acertou = true });
+Check(attempt.Respostas.Single().Acertou && attempt.Respostas.Single().AlternativaSelecionada.Correta, "Resposta correta vinculada a alternativa");
+attempt.Respostas.Add(new Resposta { TentativaId = attempt.Id, Tentativa = attempt, QuestaoId = question.Id, Questao = question, AlternativaSelecionadaId = wrong.Id, AlternativaSelecionada = wrong, Acertou = false });
+Check(!attempt.Respostas.Last().Acertou && !attempt.Respostas.Last().AlternativaSelecionada.Correta, "Resposta incorreta preservada no historico da entidade");
+Check(attempt.Respostas.Count == 2 && attempt.Respostas.All(r => r.TentativaId == attempt.Id), "Respostas associadas a tentativa");
+var ongoing = new Tentativa { TotalQuestoes = 10, TotalAcertos = 10 };
+Check(RecompensasService.Conquistas(new[] { ongoing }).Count == 0, "Partida nao finalizada nao gera conquistas");
+Check(RecompensasService.Conquistas(new[] { Finished(9, 10), ongoing }).Count == 2, "Historico ignora partida em andamento");
+Check(RecompensasService.Conquistas(new[] { Finished(10, 10), Finished(10, 10) }).Count == 3, "Conquistas nao duplicam");
+Console.WriteLine("APROVADO: 18 verificacoes de modelos, historico e recompensas.");
