@@ -58,8 +58,25 @@ try {
     Assert ($blocked.Content -match 'Pergunta\s+1\s+de') 'Avanco sem responder bloqueado'
     $premature = Invoke-WebRequest -Uri ($base + "/Jogo/Resultado?tentativaId=$attemptId") -WebSession $session -UseBasicParsing
     Assert ($premature.Content -match 'Pergunta\s+1\s+de') 'Resultado prematuro bloqueado'
+    # Tenta concluir pela ultima pergunta sem responder as anteriores.
+    $lastQuestion = Invoke-WebRequest -Uri ($base + "/Jogo/Pergunta?tentativaId=$attemptId&ordem=15") -WebSession $session -UseBasicParsing
+    $lastAnswer = [regex]::Match($lastQuestion.Content, '<button\b(?=[^>]*\bname="alternativaId")(?=[^>]*\bvalue="(\d+)")[^>]*>', 'IgnoreCase')
+    if (!$lastAnswer.Success) { throw 'Alternativa da ultima pergunta nao encontrada.' }
+    $lastToken = Field $lastQuestion.Content '__RequestVerificationToken'
+    $lastAnswered = PostForm '/Jogo/Responder' @{tentativaId=$attemptId;ordem=15;alternativaId=$lastAnswer.Groups[1].Value;__RequestVerificationToken=$lastToken}
+    Assert ($lastAnswered.Content -match 'Sua resposta:') 'Ultima pergunta respondida fora de ordem'
+    $lastToken = Field $lastAnswered.Content '__RequestVerificationToken'
+    $earlyFinish = PostForm '/Jogo/Proxima' @{tentativaId=$attemptId;ordem=15;__RequestVerificationToken=$lastToken}
+    Assert ($earlyFinish.Content -match 'Pergunta\s+1\s+de') 'Conclusao antecipada impedida pelo servidor'
     for ($order=1; $order -le 15; $order++) {
         $page = Invoke-WebRequest -Uri ($base + "/Jogo/Pergunta?tentativaId=$attemptId&ordem=$order") -WebSession $session -UseBasicParsing
+        if ($order -eq 15) {
+            Assert ($page.Content -match 'Sua resposta:') 'Ultima resposta antecipada foi preservada'
+            $token = Field $page.Content '__RequestVerificationToken'
+            $next = PostForm '/Jogo/Proxima' @{tentativaId=$attemptId;ordem=$order;__RequestVerificationToken=$token}
+            Assert ($next.Content -match 'Desafio conclu.do!') 'Partida concluida somente apos todas as respostas'
+            break
+        }
         $answer = [regex]::Match($page.Content, '<button\b(?=[^>]*\bname="alternativaId")(?=[^>]*\bvalue="(\d+)")[^>]*>', 'IgnoreCase')
         if (!$answer.Success) { throw "Alternativa nao localizada na pergunta $order" }
         $token = Field $page.Content '__RequestVerificationToken'
@@ -81,6 +98,8 @@ try {
     }
     $revisit = Invoke-WebRequest -Uri ($base + "/Jogo/Pergunta?tentativaId=$attemptId&ordem=1") -WebSession $session -UseBasicParsing
     Assert ($revisit.Content -match 'Desafio conclu.do!') 'Partida concluida nao permite voltar para responder'
+    $repeatFinish = PostForm '/Jogo/Proxima' @{tentativaId=$attemptId;ordem=15;__RequestVerificationToken=$lastToken}
+    Assert ($repeatFinish.Content -match 'Desafio conclu.do!') 'Finalizacao repetida nao reabre a partida'
     Write-Host "APROVADO: $steps verificacoes HTTP em partida completa isolada."
 } catch {
     Write-Host ('ERRO: ' + $_.Exception.Message)
