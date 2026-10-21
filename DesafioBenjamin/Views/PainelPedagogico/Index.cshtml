@@ -25,6 +25,28 @@
             <div class="col-6 col-lg-3"><div class="card h-100 shadow-sm border-0"><div class="card-body"><div class="text-muted">⭐ Aproveitamento</div><strong class="fs-2">@Model.Aproveitamento.ToString("0.#")%</strong></div></div></div>
         </div>
 
+        <section class="card shadow-sm border-0 mb-4" aria-label="Comparação de desempenho recente">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">📊 Como está minha evolução?</h2>
+                @if (Model.EvolucaoRecente.HasValue)
+                {
+                    var diferenca = Model.EvolucaoRecente.Value;
+                    <p class="fs-4 fw-bold mb-2">
+                        @(diferenca > 0 ? "+" : "")@diferenca.ToString("0.#") pontos percentuais
+                    </p>
+                    <p class="text-muted mb-0">
+                        Comparação das últimas @Model.PartidasComparadas partidas com as @Model.PartidasComparadas anteriores.
+                        @(diferenca > 0 ? "O aproveitamento recente aumentou." : diferenca < 0 ? "O aproveitamento recente diminuiu; vale revisar os conteúdos." : "O aproveitamento ficou estável.")
+                        As partidas podem envolver conteúdos e dificuldades diferentes.
+                    </p>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Conclua pelo menos duas partidas para começar a comparar sua evolução.</p>
+                }
+            </div>
+        </section>
+
         <section class="card shadow-sm border-0 mb-4" aria-label="Plano de estudos sugerido">
             <div class="card-body p-4">
                 <h2 class="h4 fw-bold">🧭 Por onde começar a estudar?</h2>
