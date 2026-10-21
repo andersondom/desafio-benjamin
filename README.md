@@ -1,4 +1,4 @@
-# Desafio Benjamin 2.0
+# Desafio Benjamin 2.1
 
 Aplicação educacional ASP.NET Core 10 com SQLite e geração local de questões pelo Ollama.
 
@@ -17,7 +17,7 @@ Todas as áreas estão disponíveis no menu principal. A escolha de uma área ad
 Na pasta raiz do repositório (onde está `compose.yaml`):
 
 ```powershell
-git pull origin feat/infra-gratuita-v2
+git pull --ff-only origin main
 docker compose -p desafio-benjamin-v2 config --quiet
 docker compose -p desafio-benjamin-v2 up -d --build --no-deps web
 docker compose -p desafio-benjamin-v2 ps
@@ -56,8 +56,15 @@ Guarde o arquivo de backup em local seguro. Faça backup separado dos materiais 
 - Desafios, revisão, pontuação, medalhas e animações permanecem funcionais.
 - Histórico de respostas e partidas preservado.
 - Sem migrations ou limpeza de volumes nesta etapa.
-- Não realizar merge do PR de desenvolvimento sem aprovação explícita.
+- Para alterações futuras, trabalhar em uma branch e validar antes de integrar à `main`.
 
 ## Estado de entrega
 
-**Versão estável homologada funcionalmente em 19/10/2026**, na branch `feat/infra-gratuita-v2`, sem merge. O usuário confirmou 8 de 8 verificações: menu completo, acesso público, autenticação do laboratório, retorno ao destino após login, proteção e redirecionamento das áreas administrativas, logout, menu responsivo e preservação de desafios e histórico. Sem observações. Esta aprovação se refere ao ambiente Docker local testado pelo usuário; não equivale a auditoria independente de segurança ou testes automatizados de regressão. Não executar merge sem autorização explícita.
+**Versão 2.1 homologada funcionalmente em 21/10/2026 e publicada no Docker local.** Foram aprovadas 82 verificações automatizadas (22 de modelos/recompensas/metas, 13 de contrato/disponibilidade e 47 de partida isolada) e as três frentes de homologação funcional: aprendizagem adaptativa, gamificação semanal e painel pedagógico. Sem observações ou pendências funcionais relatadas.
+
+Documentação de aceite e manutenção:
+
+- [Encerramento da versão 2.1](docs/EVOLUCAO-V2.1.md)
+- [Histórico de homologação da versão 2.0](docs/HOMOLOGACAO-FINAL-V2.md)
+
+Este aceite cobre o ambiente local validado pelo responsável, não uma auditoria independente de segurança ou publicação na internet. A branch `main` é a referência para novas intervenções após a integração aprovada pelo responsável.
