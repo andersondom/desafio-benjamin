@@ -114,7 +114,7 @@ try {
     # Homologacao autenticada no ambiente descartavel: sem credenciais ou dados reais.
     $loginPage = Invoke-WebRequest -Uri ($base + '/administracao/entrar') -WebSession $session -UseBasicParsing
     $loginToken = Field $loginPage.Content '__RequestVerificationToken'
-    $loggedIn = PostForm '/administracao/entrar' @{ usuario='teste-isolado'; senha='SenhaDeTesteSomenteAqui2026!'; __RequestVerificationToken=$loginToken }
+    $loggedIn = PostForm '/administracao/entrar?returnUrl=%2Fpainel-pedagogico' @{ usuario='teste-isolado'; senha='SenhaDeTesteSomenteAqui2026!'; __RequestVerificationToken=$loginToken }
     Assert ($loggedIn.BaseResponse.ResponseUri.AbsolutePath -ne '/administracao/entrar') 'Login administrativo de teste autenticado'
     $dashboard = Invoke-WebRequest -Uri ($base + '/painel-pedagogico') -WebSession $session -UseBasicParsing
     Assert ($dashboard.StatusCode -eq 200 -and $dashboard.BaseResponse.ResponseUri.AbsolutePath -eq '/painel-pedagogico') 'Painel pedagogico acessivel com login'
