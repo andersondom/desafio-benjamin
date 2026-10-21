@@ -30,17 +30,17 @@ try {
     $id = & docker @args
     if ($LASTEXITCODE -ne 0) { throw 'Nao foi possivel iniciar o container isolado.' }
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-    $home = $null
+    $homeResponse = $null
     for ($i=0; $i -lt 45; $i++) {
         try {
-            $home = Invoke-WebRequest -Uri ($base + '/') -WebSession $session -UseBasicParsing -TimeoutSec 3
-            if ($home.StatusCode -eq 200) { break }
+            $homeResponse = Invoke-WebRequest -Uri ($base + '/') -WebSession $session -UseBasicParsing -TimeoutSec 3
+            if ($homeResponse.StatusCode -eq 200) { break }
         } catch { Start-Sleep -Seconds 2 }
     }
-    Assert ($null -ne $home -and $home.StatusCode -eq 200) 'Aplicacao isolada iniciou e respondeu HTTP 200'
-    $link = [regex]::Match($home.Content, 'href="([^"]*/Jogo/Index/\d+[^"]*)"', 'IgnoreCase')
+    Assert ($null -ne $homeResponse -and $homeResponse.StatusCode -eq 200) 'Aplicacao isolada iniciou e respondeu HTTP 200'
+    $link = [regex]::Match($homeResponse.Content, 'href="([^"]*/Jogo/Index/\d+[^"]*)"', 'IgnoreCase')
     if (!$link.Success) {
-        $link = [regex]::Match($home.Content, 'href="([^"]*/Jogo(?:/Index)?\?id=\d+[^"]*)"', 'IgnoreCase')
+        $link = [regex]::Match($homeResponse.Content, 'href="([^"]*/Jogo(?:/Index)?\?id=\d+[^"]*)"', 'IgnoreCase')
     }
     if (!$link.Success) { throw 'Nao foi possivel localizar o link de inicio de desafio na pagina inicial.' }
     $gameUrl = [Net.WebUtility]::HtmlDecode($link.Groups[1].Value)
