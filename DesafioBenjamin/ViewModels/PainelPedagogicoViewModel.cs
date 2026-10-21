@@ -6,6 +6,8 @@ public sealed class PainelPedagogicoViewModel
     public int TotalQuestoes { get; init; }
     public int TotalAcertos { get; init; }
     public double Aproveitamento { get; init; }
+    public double? EvolucaoRecente { get; init; }
+    public int PartidasComparadas { get; init; }
     public List<DesempenhoDisciplina> Disciplinas { get; init; } = new();
     public List<PartidaResumo> Historico { get; init; } = new();
     public List<OrientacaoEstudo> Orientacoes { get; init; } = new();
