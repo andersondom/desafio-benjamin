@@ -47,6 +47,31 @@
             </div>
         </section>
 
+        <section class="card shadow-sm border-0 mb-4" aria-label="Metas semanais e evolução por disciplina">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">🎯 Metas da semana</h2>
+                <p>Partidas: <strong>@Model.Semana.Partidas / @DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas</strong>
+                @(Model.Semana.MetaPartidasAtingida ? "🏅 Meta atingida" : "— em andamento")</p>
+                <p>Acertos: <strong>@Model.Semana.Acertos / @DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos</strong>
+                @(Model.Semana.MetaAcertosAtingida ? "🏅 Meta atingida" : "— em andamento")</p>
+                <h3 class="h5 fw-bold mt-4">📈 Evolução por disciplina</h3>
+                <p class="text-muted">Comparação entre grupos consecutivos de até cinco partidas concluídas da mesma disciplina. Conteúdos e dificuldades podem variar.</p>
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in Model.EvolucaoPorDisciplina)
+                    {
+                        <li class="list-group-item d-flex justify-content-between gap-2">
+                            <span>@item.Nome</span>
+                            <span>
+                                @(item.Diferenca.HasValue
+                                    ? (item.Diferenca.Value > 0 ? "+" : "") + item.Diferenca.Value.ToString("0.#") + " p.p. (" + item.PartidasComparadas + " vs. " + item.PartidasComparadas + " partidas)"
+                                    : "Aguardando 2 partidas")
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+
         <section class="card shadow-sm border-0 mb-4" aria-label="Plano de estudos sugerido">
             <div class="card-body p-4">
                 <h2 class="h4 fw-bold">🧭 Por onde começar a estudar?</h2>
