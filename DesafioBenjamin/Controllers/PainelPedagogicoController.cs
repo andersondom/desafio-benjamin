@@ -71,6 +71,27 @@ public sealed class PainelPedagogicoController : Controller
             .Take(10)
             .ToList();
 
+        // Recomendacoes explicaveis baseadas exclusivamente em erros observados.
+        // Acoes sugeridas nao classificam capacidade ou diagnostico do aluno.
+        var orientacoes = respostas
+            .Where(r => !r.Acertou)
+            .GroupBy(r => new { r.Disciplina, r.Capitulo })
+            .Select(g =>
+            {
+                var total = respostas.Count(r => r.Disciplina == g.Key.Disciplina && r.Capitulo == g.Key.Capitulo);
+                var erros = g.Count();
+                var prioridade = erros >= 3 && erros * 2 >= total ? "Priorizar" : "Revisar";
+                var sugestao = prioridade == "Priorizar"
+                    ? "Retomar o conteúdo com exemplos e depois praticar na revisão inteligente."
+                    : "Refazer algumas questões e acompanhar os próximos resultados.";
+                return new OrientacaoEstudo(g.Key.Disciplina, g.Key.Capitulo, erros, total, prioridade, sugestao);
+            })
+            .OrderByDescending(o => o.Prioridade == "Priorizar")
+            .ThenByDescending(o => o.Erros)
+            .ThenBy(o => o.Disciplina)
+            .Take(5)
+            .ToList();
+
         var model = new PainelPedagogicoViewModel
         {
             TotalPartidas = partidas.Count,
@@ -82,7 +103,8 @@ public sealed class PainelPedagogicoController : Controller
                 t.Id, t.FinalizadaEm!.Value, t.Disciplina, t.Questionario,
                 t.Capitulo, t.TotalAcertos, t.TotalQuestoes,
                 Percentual(t.TotalAcertos, t.TotalQuestoes))).ToList(),
-            Dificuldades = dificuldades
+            Dificuldades = dificuldades,
+            Orientacoes = orientacoes
         };
 
         Response.Headers.CacheControl = "no-store";
