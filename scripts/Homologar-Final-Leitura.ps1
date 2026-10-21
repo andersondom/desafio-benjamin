@@ -11,9 +11,9 @@ function GetPage([string]$path) {
     return Invoke-WebRequest -Uri ($base + $path) -UseBasicParsing -MaximumRedirection 10 -TimeoutSec 20
 }
 Write-Host 'Homologacao final: somente leitura, sem alterar dados nem publicar.'
-$home = GetPage '/'
-Check ($home.StatusCode -eq 200) 'Pagina inicial responde HTTP 200'
-Check ($home.Content -match 'Desafio Benjamin') 'Pagina inicial identifica o aplicativo'
+$paginaInicial = GetPage '/'
+Check ($paginaInicial.StatusCode -eq 200) 'Pagina inicial responde HTTP 200'
+Check ($paginaInicial.Content -match 'Desafio Benjamin') 'Pagina inicial identifica o aplicativo'
 $review = GetPage '/revisao-inteligente'
 Check ($review.StatusCode -eq 200) 'Revisao inteligente acessivel'
 $login = GetPage '/administracao/entrar'
