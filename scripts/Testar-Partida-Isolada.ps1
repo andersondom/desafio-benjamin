@@ -53,6 +53,10 @@ try {
     $gameUrl = [Net.WebUtility]::HtmlDecode($link.Groups[1].Value)
     $game = Invoke-WebRequest -Uri ([uri]::new([uri]$base,$gameUrl)) -WebSession $session -UseBasicParsing
     Assert ($game.StatusCode -eq 200) 'Pagina do desafio acessivel'
+    # O painel pedagogico exige autenticacao administrativa, inclusive no ambiente isolado.
+    $adminPage = Invoke-WebRequest -Uri ($base + '/painel-pedagogico') -WebSession $session -UseBasicParsing -MaximumRedirection 10
+    Assert ($adminPage.BaseResponse.ResponseUri.AbsolutePath -ne '/painel-pedagogico') 'Painel pedagogico protegido sem login'
+    Assert ($adminPage.Content -match '(?i)(senha|entrar|login)') 'Acesso anonimo encaminhado para autenticacao'
     $questionnaireId = Field $game.Content 'questionarioId'
     $token = Field $game.Content '__RequestVerificationToken'
     $start = PostForm '/Jogo/Iniciar' @{questionarioId=$questionnaireId;__RequestVerificationToken=$token}
