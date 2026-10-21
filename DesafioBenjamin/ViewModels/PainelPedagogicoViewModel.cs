@@ -21,4 +21,5 @@ public sealed record PartidaResumo(int Id, DateTime Data, string Disciplina, str
 public sealed record DificuldadeResumo(string Disciplina, string? Capitulo, string Questao, int Erros, int Respostas, double PercentualErros);
 
 public sealed record OrientacaoEstudo(string Disciplina, string? Capitulo, int Erros, int Respostas, string Prioridade, string Sugestao);
-\npublic sealed record EvolucaoDisciplina(string Nome, double? Diferenca, int PartidasComparadas);\n
+
+public sealed record EvolucaoDisciplina(string Nome, double? Diferenca, int PartidasComparadas);
