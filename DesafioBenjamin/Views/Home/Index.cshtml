@@ -18,6 +18,24 @@
         <div class="resumo-card"><span>🔥</span><div><strong>@ViewBag.TotalAcertos</strong><small>Acertos</small></div></div>
     </section>
 
+    @{
+        var semana = (DesafioBenjamin.Services.ResumoSemanal)ViewBag.ProgressoSemanal;
+    }
+    <section class="card shadow-sm border-0 mt-4" aria-label="Metas da semana">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold">🏆 Missões da semana</h2>
+            <p class="text-muted">Semana iniciada em @semana.Inicio.ToString("dd/MM"). As metas recomeçam toda segunda-feira.</p>
+            <p>🎮 Partidas concluídas: <strong>@semana.Partidas / @DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas</strong> @(semana.MetaPartidasAtingida ? "🏅 Missão cumprida!" : "— continue jogando!")</p>
+            <div class="progress mb-3" role="progressbar" aria-label="Progresso de partidas" aria-valuenow="@Math.Min(semana.Partidas, DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas)" aria-valuemin="0" aria-valuemax="@DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas">
+                <div class="progress-bar" style="width:@(Math.Min(100, semana.Partidas * 100 / DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas))%"></div>
+            </div>
+            <p>🎯 Acertos na semana: <strong>@semana.Acertos / @DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos</strong> @(semana.MetaAcertosAtingida ? "🏅 Missão cumprida!" : "— você consegue!")</p>
+            <div class="progress" role="progressbar" aria-label="Progresso de acertos" aria-valuenow="@Math.Min(semana.Acertos, DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos)" aria-valuemin="0" aria-valuemax="@DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos">
+                <div class="progress-bar bg-success" style="width:@(Math.Min(100, semana.Acertos * 100 / DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos))%"></div>
+            </div>
+        </div>
+    </section>
+
     <section class="card shadow-sm border-0 mt-4" aria-label="Minhas recompensas">
         <div class="card-body p-4">
             <h2 class="h4 fw-bold">🌟 Minhas recompensas</h2>
