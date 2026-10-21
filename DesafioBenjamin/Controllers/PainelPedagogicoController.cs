@@ -33,6 +33,22 @@ public sealed class PainelPedagogicoController : Controller
         var totalQuestoes = partidas.Sum(t => t.TotalQuestoes);
         var totalAcertos = partidas.Sum(t => t.TotalAcertos);
 
+        // Compara janelas de mesmo tamanho, sem confundir variacao com diagnostico.
+        // Exige ao menos duas partidas concluidas para uma comparacao justa.
+        var janela = Math.Min(5, partidas.Count / 2);
+        double? evolucaoRecente = null;
+        if (janela > 0)
+        {
+            var recentes = partidas.Take(janela).ToList();
+            var anteriores = partidas.Skip(janela).Take(janela).ToList();
+            var totalRecente = recentes.Sum(p => p.TotalQuestoes);
+            var totalAnterior = anteriores.Sum(p => p.TotalQuestoes);
+            if (totalRecente > 0 && totalAnterior > 0)
+                evolucaoRecente = Math.Round(
+                    Percentual(recentes.Sum(p => p.TotalAcertos), totalRecente)
+                    - Percentual(anteriores.Sum(p => p.TotalAcertos), totalAnterior), 1);
+        }
+
         var disciplinas = partidas
             .GroupBy(t => t.Disciplina)
             .Select(g =>
@@ -95,6 +111,8 @@ public sealed class PainelPedagogicoController : Controller
         var model = new PainelPedagogicoViewModel
         {
             TotalPartidas = partidas.Count,
+            EvolucaoRecente = evolucaoRecente,
+            PartidasComparadas = janela,
             TotalQuestoes = totalQuestoes,
             TotalAcertos = totalAcertos,
             Aproveitamento = Percentual(totalAcertos, totalQuestoes),
