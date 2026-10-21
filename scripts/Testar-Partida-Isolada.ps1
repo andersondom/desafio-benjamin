@@ -111,6 +111,16 @@ try {
     Assert ($revisit.Content -match 'Desafio conclu.do!') 'Partida concluida nao permite voltar para responder'
     $repeatFinish = PostForm '/Jogo/Proxima' @{tentativaId=$attemptId;ordem=15;__RequestVerificationToken=$lastToken}
     Assert ($repeatFinish.Content -match 'Desafio conclu.do!') 'Finalizacao repetida nao reabre a partida'
+    # Homologacao autenticada no ambiente descartavel: sem credenciais ou dados reais.
+    $loginPage = Invoke-WebRequest -Uri ($base + '/administracao/entrar') -WebSession $session -UseBasicParsing
+    $loginToken = Field $loginPage.Content '__RequestVerificationToken'
+    $loggedIn = PostForm '/administracao/entrar' @{ usuario='teste-isolado'; senha='SenhaDeTesteSomenteAqui2026!'; __RequestVerificationToken=$loginToken }
+    Assert ($loggedIn.BaseResponse.ResponseUri.AbsolutePath -ne '/administracao/entrar') 'Login administrativo de teste autenticado'
+    $dashboard = Invoke-WebRequest -Uri ($base + '/painel-pedagogico') -WebSession $session -UseBasicParsing
+    Assert ($dashboard.StatusCode -eq 200 -and $dashboard.BaseResponse.ResponseUri.AbsolutePath -eq '/painel-pedagogico') 'Painel pedagogico acessivel com login'
+    Assert ($dashboard.Content -match 'Por onde come.ar a estudar') 'Plano de estudos exibido no painel'
+    Assert ($dashboard.Content -match 'Como est. minha evolu..o') 'Comparacao de evolucao exibida no painel'
+    Assert ($dashboard.Content -match 'Aproveitamento por disciplina') 'Indicadores pedagogicos preservados'
     Write-Host "APROVADO: $steps verificacoes HTTP em partida completa isolada."
 } catch {
     Write-Host ('ERRO: ' + $_.Exception.Message)
