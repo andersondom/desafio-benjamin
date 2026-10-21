@@ -1,4 +1,5 @@
 using DesafioBenjamin.Data;
+using DesafioBenjamin.Services;
 using DesafioBenjamin.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,32 @@ public sealed class PainelPedagogicoController : Controller
                     Percentual(recentes.Sum(p => p.TotalAcertos), totalRecente)
                     - Percentual(anteriores.Sum(p => p.TotalAcertos), totalAnterior), 1);
         }
+
+        var evolucaoPorDisciplina = partidas.GroupBy(p => p.Disciplina)
+            .Select(g =>
+            {
+                var lista = g.ToList();
+                var n = Math.Min(5, lista.Count / 2);
+                if (n == 0) return new EvolucaoDisciplina(g.Key, null, 0);
+                var recentes = lista.Take(n).ToList();
+                var anteriores = lista.Skip(n).Take(n).ToList();
+                var qr = recentes.Sum(p => p.TotalQuestoes);
+                var qa = anteriores.Sum(p => p.TotalQuestoes);
+                double? delta = qr > 0 && qa > 0
+                    ? Math.Round(Percentual(recentes.Sum(p => p.TotalAcertos), qr)
+                        - Percentual(anteriores.Sum(p => p.TotalAcertos), qa), 1)
+                    : null;
+                return new EvolucaoDisciplina(g.Key, delta, n);
+            }).OrderBy(x => x.Nome).ToList();
+
+        var historicoSemanal = await _context.Tentativas.AsNoTracking()
+            .Where(t => t.Aluno.Nome == "Benjamin" && t.FinalizadaEm != null)
+            .Select(t => new DesafioBenjamin.Models.Tentativa
+            {
+                FinalizadaEm = t.FinalizadaEm,
+                TotalAcertos = t.TotalAcertos
+            }).ToListAsync();
+        var semana = ProgressoSemanalService.Calcular(historicoSemanal, DateTime.Now);
 
         var disciplinas = partidas
             .GroupBy(t => t.Disciplina)
@@ -110,6 +137,8 @@ public sealed class PainelPedagogicoController : Controller
 
         var model = new PainelPedagogicoViewModel
         {
+            Semana = semana,
+            EvolucaoPorDisciplina = evolucaoPorDisciplina,
             TotalPartidas = partidas.Count,
             EvolucaoRecente = evolucaoRecente,
             PartidasComparadas = janela,
