@@ -53,6 +53,11 @@ try {
     if (!$idMatch.Success) { throw 'Nao foi possivel localizar a tentativa iniciada.' }
     $attemptId = $idMatch.Groups[1].Value
     Assert ($start.Content -match 'Pergunta') 'Tentativa iniciada e primeira pergunta exibida'
+    $firstToken = Field $start.Content '__RequestVerificationToken'
+    $blocked = PostForm '/Jogo/Proxima' @{tentativaId=$attemptId;ordem=1;__RequestVerificationToken=$firstToken}
+    Assert ($blocked.Content -match 'Pergunta\s+1\s+de') 'Avanco sem responder bloqueado'
+    $premature = Invoke-WebRequest -Uri ($base + "/Jogo/Resultado?tentativaId=$attemptId") -WebSession $session -UseBasicParsing
+    Assert ($premature.Content -match 'Pergunta\s+1\s+de') 'Resultado prematuro bloqueado'
     for ($order=1; $order -le 15; $order++) {
         $page = Invoke-WebRequest -Uri ($base + "/Jogo/Pergunta?tentativaId=$attemptId&ordem=$order") -WebSession $session -UseBasicParsing
         $answer = [regex]::Match($page.Content, '<button\b(?=[^>]*\bname="alternativaId")(?=[^>]*\bvalue="(\d+)")[^>]*>', 'IgnoreCase')
@@ -60,6 +65,12 @@ try {
         $token = Field $page.Content '__RequestVerificationToken'
         $answered = PostForm '/Jogo/Responder' @{tentativaId=$attemptId;ordem=$order;alternativaId=$answer.Groups[1].Value;__RequestVerificationToken=$token}
         Assert ($answered.Content -match 'Sua resposta:') "Resposta $order registrada com feedback"
+        if ($order -eq 1) {
+            $scoreBefore = [regex]::Match($answered.Content, '([0-9]+) acertos</span>')
+            $duplicate = PostForm '/Jogo/Responder' @{tentativaId=$attemptId;ordem=$order;alternativaId=$answer.Groups[1].Value;__RequestVerificationToken=$token}
+            $scoreAfter = [regex]::Match($duplicate.Content, '([0-9]+) acertos</span>')
+            Assert ($duplicate.Content -match 'Sua resposta:' -and $scoreBefore.Success -and $scoreAfter.Success -and $scoreBefore.Groups[1].Value -eq $scoreAfter.Groups[1].Value) 'Resposta duplicada nao altera a pontuacao'
+        }
         $token = Field $answered.Content '__RequestVerificationToken'
         $next = PostForm '/Jogo/Proxima' @{tentativaId=$attemptId;ordem=$order;__RequestVerificationToken=$token}
         if ($order -lt 15) {
@@ -68,6 +79,8 @@ try {
             Assert ($next.Content -match 'Desafio conclu.do!') 'Partida finalizada e resultado exibido'
         }
     }
+    $revisit = Invoke-WebRequest -Uri ($base + "/Jogo/Pergunta?tentativaId=$attemptId&ordem=1") -WebSession $session -UseBasicParsing
+    Assert ($revisit.Content -match 'Desafio conclu.do!') 'Partida concluida nao permite voltar para responder'
     Write-Host "APROVADO: $steps verificacoes HTTP em partida completa isolada."
 } catch {
     Write-Host ('ERRO: ' + $_.Exception.Message)
