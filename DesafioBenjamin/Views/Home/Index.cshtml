@@ -1,97 +1,91 @@
-﻿@{
+@model IEnumerable<DesafioBenjamin.Models.Questionario>
+@{
     ViewData["Title"] = "Desafio do Benjamin";
 }
-
 <div class="benjamin-home">
-
     <section class="hero-benjamin">
         <div>
             <span class="hero-badge">🎓 Minha área de estudos</span>
-
             <h1>Olá, Benjamin! 👋</h1>
-
-            <p>
-                Preparado para mais um desafio?
-                Escolha uma disciplina e mostre o que você aprendeu!
-            </p>
+            <p>Preparado para mais um desafio? Escolha uma disciplina e mostre o que você aprendeu!</p>
         </div>
-
-        <div class="hero-trophy">
-            🏆
-        </div>
+        <div class="hero-trophy benjamin-mascot" role="img" aria-label="Robô explorador acenando">🤖<span class="mascot-sparkle" aria-hidden="true">✨</span></div>
     </section>
 
     <section class="resumo">
-        <div class="resumo-card">
-            <span>🎮</span>
-            <div>
-                <strong>0</strong>
-                <small>Desafios realizados</small>
+        <div class="resumo-card benjamin-entrance"><span>🎮</span><div><strong>@ViewBag.TotalDesafios</strong><small>Desafios realizados</small></div></div>
+        <div class="resumo-card"><span>⭐</span><div><strong>@ViewBag.Aproveitamento%</strong><small>Aproveitamento</small></div></div>
+        <div class="resumo-card"><span>🔥</span><div><strong>@ViewBag.TotalAcertos</strong><small>Acertos</small></div></div>
+    </section>
+
+    @{
+        var semana = (DesafioBenjamin.Services.ResumoSemanal)ViewBag.ProgressoSemanal;
+    }
+    <section class="card shadow-sm border-0 mt-4" aria-label="Metas da semana">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold">🏆 Missões da semana</h2>
+            <p class="text-muted">Semana iniciada em @semana.Inicio.ToString("dd/MM"). As metas recomeçam toda segunda-feira.</p>
+            <p>🎮 Partidas concluídas: <strong>@semana.Partidas / @DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas</strong> @(semana.MetaPartidasAtingida ? "🏅 Missão cumprida!" : "— continue jogando!")</p>
+            <div class="progress mb-3" role="progressbar" aria-label="Progresso de partidas" aria-valuenow="@Math.Min(semana.Partidas, DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas)" aria-valuemin="0" aria-valuemax="@DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas">
+                <div class="progress-bar" style="width:@(Math.Min(100, semana.Partidas * 100 / DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas))%"></div>
+            </div>
+            <p>🎯 Acertos na semana: <strong>@semana.Acertos / @DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos</strong> @(semana.MetaAcertosAtingida ? "🏅 Missão cumprida!" : "— você consegue!")</p>
+            <div class="progress" role="progressbar" aria-label="Progresso de acertos" aria-valuenow="@Math.Min(semana.Acertos, DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos)" aria-valuemin="0" aria-valuemax="@DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos">
+                <div class="progress-bar bg-success" style="width:@(Math.Min(100, semana.Acertos * 100 / DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos))%"></div>
             </div>
         </div>
+    </section>
 
-        <div class="resumo-card">
-            <span>⭐</span>
-            <div>
-                <strong>0%</strong>
-                <small>Aproveitamento</small>
-            </div>
+    <section class="card shadow-sm border-0 mt-4" aria-label="Minhas recompensas">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold">🌟 Minhas recompensas</h2>
+            <p class="mb-2"><strong>⭐ @ViewBag.Estrelas estrelas</strong> conquistadas em desafios concluídos</p>
+            @if (((IReadOnlyList<string>)ViewBag.Conquistas).Count == 0)
+            {
+                <p class="text-muted mb-0">Sua primeira conquista está esperando por você!</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var conquista in (IReadOnlyList<string>)ViewBag.Conquistas)
+                    {
+                        <li class="py-1">@conquista</li>
+                    }
+                </ul>
+            }
         </div>
+    </section>
 
-        <div class="resumo-card">
-            <span>🔥</span>
+    <section class="card shadow-sm border-0 mt-4" aria-label="Revisão inteligente">
+        <div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
-                <strong>0</strong>
-                <small>Acertos</small>
+                <h2 class="h4 fw-bold">🧠 Revisão inteligente</h2>
+                <p class="text-muted mb-0">Treine as questões em que você encontrou dificuldades, Benjamin!</p>
             </div>
+            <a asp-controller="RevisaoInteligente" asp-action="Index" class="btn btn-success btn-lg">🚀 Começar revisão</a>
         </div>
     </section>
 
     <section class="disciplinas">
-
-        <div class="titulo-secao">
-            <div>
-                <h2>Meus desafios</h2>
-                <p>Escolha uma disciplina para começar.</p>
-            </div>
-        </div>
-
+        <div class="titulo-secao"><div><h2>Meus desafios</h2><p>Escolha uma disciplina para começar.</p></div></div>
         <div class="grade-disciplinas">
-
-            <article class="disciplina-card geografia">
-
-                <div class="disciplina-icone">
-                    🌎
-                </div>
-
-                <div class="disciplina-conteudo">
-                    <span class="materia">GEOGRAFIA</span>
-
-                    <h3>Relevo e Hidrografia</h3>
-
-                    <p>
-                        Capítulo 9 • Páginas 216–224
-                    </p>
-
-                    <div class="info-quiz">
-                        <span>❓ 15 perguntas por partida</span>
-                        <span>🎲 Perguntas sorteadas</span>
+            @foreach (var quiz in Model)
+            {
+                var classe = quiz.Disciplina.Nome == "Geografia" ? "geografia" : "ingles";
+                <article class="disciplina-card @classe">
+                    <div class="disciplina-icone">@quiz.Disciplina.Icone</div>
+                    <div class="disciplina-conteudo">
+                        <span class="materia">@quiz.Disciplina.Nome.ToUpper()</span>
+                        <h3>@quiz.Titulo</h3>
+                        <p>@quiz.Capitulo</p>
+                        <div class="info-quiz">
+                            <span>❓ 15 perguntas por partida</span>
+                            <span>🎲 Perguntas sorteadas</span>
+                        </div>
+                        <a asp-controller="Jogo" asp-action="Index" asp-route-id="@quiz.Id" class="btn-jogar">🎮 JOGAR AGORA</a>
                     </div>
-
-                    <a asp-controller="Jogo"
-                       asp-action="Index"
-                       asp-route-id="1"
-                       class="btn-jogar">
-
-                        🎮 JOGAR AGORA
-
-                    </a>
-                </div>
-
-            </article>
-
+                </article>
+            }
         </div>
-
     </section>
-
 </div>

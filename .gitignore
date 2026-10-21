@@ -18,3 +18,8 @@ obj/
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Segredos e configuracoes locais
+.env
+.env.*
+!.env.example

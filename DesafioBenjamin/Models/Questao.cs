@@ -10,6 +10,8 @@ public class Questao
 
     public int Ordem { get; set; }
 
+    public bool Ativa { get; set; } = true;
+
     public int QuestionarioId { get; set; }
 
     public Questionario Questionario { get; set; } = null!;

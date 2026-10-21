@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.history/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+.git/
+.env
+.env.*
+!.env.example

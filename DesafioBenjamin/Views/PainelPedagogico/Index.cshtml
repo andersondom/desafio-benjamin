@@ -1,0 +1,186 @@
+@model DesafioBenjamin.ViewModels.PainelPedagogicoViewModel
+@{
+    ViewData["Title"] = "Painel pedagógico";
+}
+<div class="container py-4 pedagogical-dashboard">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <p class="text-muted mb-1">Área administrativa · Benjamin</p>
+            <h1 class="fw-bold mb-1">📊 Painel de desempenho pedagógico</h1>
+            <p class="text-muted mb-0">Resultados de partidas concluídas, sem alterar o histórico.</p>
+        </div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">🏠 Voltar ao início</a>
+    </div>
+
+    @if (Model.TotalPartidas == 0)
+    {
+        <div class="alert alert-info" role="status">Ainda não há partidas concluídas para analisar. O painel será preenchido automaticamente quando Benjamin concluir desafios.</div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3"><div class="card h-100 shadow-sm border-0"><div class="card-body"><div class="text-muted">🎮 Partidas</div><strong class="fs-2">@Model.TotalPartidas</strong></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card h-100 shadow-sm border-0"><div class="card-body"><div class="text-muted">❓ Questões</div><strong class="fs-2">@Model.TotalQuestoes</strong></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card h-100 shadow-sm border-0"><div class="card-body"><div class="text-muted">🎯 Acertos</div><strong class="fs-2">@Model.TotalAcertos</strong></div></div></div>
+            <div class="col-6 col-lg-3"><div class="card h-100 shadow-sm border-0"><div class="card-body"><div class="text-muted">⭐ Aproveitamento</div><strong class="fs-2">@Model.Aproveitamento.ToString("0.#")%</strong></div></div></div>
+        </div>
+
+        <section class="card shadow-sm border-0 mb-4" aria-label="Comparação de desempenho recente">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">📊 Como está minha evolução?</h2>
+                @if (Model.EvolucaoRecente.HasValue)
+                {
+                    var diferenca = Model.EvolucaoRecente.Value;
+                    <p class="fs-4 fw-bold mb-2">
+                        @(diferenca > 0 ? "+" : "")@diferenca.ToString("0.#") pontos percentuais
+                    </p>
+                    <p class="text-muted mb-0">
+                        Comparação das últimas @Model.PartidasComparadas partidas com as @Model.PartidasComparadas anteriores.
+                        @(diferenca > 0 ? "O aproveitamento recente aumentou." : diferenca < 0 ? "O aproveitamento recente diminuiu; vale revisar os conteúdos." : "O aproveitamento ficou estável.")
+                        As partidas podem envolver conteúdos e dificuldades diferentes.
+                    </p>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">Conclua pelo menos duas partidas para começar a comparar sua evolução.</p>
+                }
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mb-4" aria-label="Metas semanais e evolução por disciplina">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">🎯 Metas da semana</h2>
+                <p>Partidas: <strong>@Model.Semana.Partidas / @DesafioBenjamin.Services.ProgressoSemanalService.MetaPartidas</strong>
+                @(Model.Semana.MetaPartidasAtingida ? "🏅 Meta atingida" : "— em andamento")</p>
+                <p>Acertos: <strong>@Model.Semana.Acertos / @DesafioBenjamin.Services.ProgressoSemanalService.MetaAcertos</strong>
+                @(Model.Semana.MetaAcertosAtingida ? "🏅 Meta atingida" : "— em andamento")</p>
+                <h3 class="h5 fw-bold mt-4">📈 Evolução por disciplina</h3>
+                <p class="text-muted">Comparação entre grupos consecutivos de até cinco partidas concluídas da mesma disciplina. Conteúdos e dificuldades podem variar.</p>
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in Model.EvolucaoPorDisciplina)
+                    {
+                        <li class="list-group-item d-flex justify-content-between gap-2">
+                            <span>@item.Nome</span>
+                            <span>
+                                @(item.Diferenca.HasValue
+                                    ? (item.Diferenca.Value > 0 ? "+" : "") + item.Diferenca.Value.ToString("0.#") + " p.p. (" + item.PartidasComparadas + " vs. " + item.PartidasComparadas + " partidas)"
+                                    : "Aguardando 2 partidas")
+                            </span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mb-4" aria-label="Plano de estudos sugerido">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">🧭 Por onde começar a estudar?</h2>
+                <p class="text-muted">Sugestões automáticas baseadas apenas nos erros registrados em partidas concluídas. Não são diagnósticos.</p>
+                @if (Model.Orientacoes.Count == 0)
+                {
+                    <p class="mb-0">Ainda não há erros registrados. Continue praticando para acompanhar sua evolução!</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var item in Model.Orientacoes)
+                        {
+                            <div class="col-md-6">
+                                <article class="border rounded p-3 h-100">
+                                    <span class="badge @(item.Prioridade == "Priorizar" ? "bg-warning text-dark" : "bg-secondary")">@item.Prioridade</span>
+                                    <h3 class="h6 fw-bold mt-2">@item.Disciplina @if (!string.IsNullOrWhiteSpace(item.Capitulo)) { <small class="text-muted">· @item.Capitulo</small> }</h3>
+                                    <p class="small mb-2">@item.Erros erros em @item.Respostas respostas registradas nesse conteúdo.</p>
+                                    <p class="mb-0">@item.Sugestao</p>
+                                </article>
+                            </div>
+                        }
+                    </div>
+                    <a asp-controller="RevisaoInteligente" asp-action="Index" class="btn btn-success mt-3">🧠 Abrir revisão inteligente</a>
+                }
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold mb-3">📚 Aproveitamento por disciplina</h2>
+                @foreach (var d in Model.Disciplinas)
+                {
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between gap-2 mb-2">
+                            <strong>@d.Nome</strong>
+                            <span>@d.Percentual.ToString("0.#")% · @d.Acertos/@d.Questoes acertos · @d.Partidas partidas</span>
+                        </div>
+                        <div class="progress" style="height:18px" aria-label="Aproveitamento em @d.Nome">
+                            <div class="progress-bar bg-primary" role="progressbar" aria-valuenow="@d.Percentual.ToString(System.Globalization.CultureInfo.InvariantCulture)" aria-valuemin="0" aria-valuemax="100" style="width:@(d.Percentual.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">📈 Evolução nas últimas partidas</h2>
+                <p class="text-muted">Da mais antiga para a mais recente entre as últimas 12 partidas concluídas.</p>
+                <div class="pedagogy-trend" role="img" aria-label="Gráfico de barras de aproveitamento das últimas partidas">
+                    @foreach (var partida in Model.Historico.Take(12).Reverse())
+                    {
+                        <div class="pedagogy-trend-item" title="@partida.Disciplina: @partida.Percentual.ToString("0.#")% em @partida.Data.ToString("dd/MM/yyyy")">
+                            <span class="small fw-bold">@partida.Percentual.ToString("0")%</span>
+                            <div class="pedagogy-trend-track"><div class="pedagogy-trend-bar" style="height:@(partida.Percentual.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                            <span class="small text-muted">@partida.Data.ToString("dd/MM")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">🧩 Questões que merecem revisão</h2>
+                <p class="text-muted">Até 10 questões com maior número de erros registrados em partidas concluídas. Não é um diagnóstico de aprendizagem.</p>
+                @if (Model.Dificuldades.Count == 0)
+                {
+                    <p class="mb-0">Nenhum erro registrado nas partidas concluídas.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead><tr><th scope="col">Disciplina / capítulo</th><th scope="col">Questão</th><th scope="col">Erros</th><th scope="col">Tentativas</th></tr></thead>
+                            <tbody>
+                                @foreach (var d in Model.Dificuldades)
+                                {
+                                    <tr><td>@d.Disciplina<br /><small class="text-muted">@d.Capitulo</small></td><td>@d.Questao</td><td>@d.Erros</td><td>@d.Respostas</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <section class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h2 class="h4 fw-bold">🗓️ Histórico das últimas 30 partidas</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead><tr><th scope="col">Data</th><th scope="col">Disciplina</th><th scope="col">Questionário</th><th scope="col">Acertos</th><th scope="col">Aproveitamento</th></tr></thead>
+                        <tbody>
+                            @foreach (var p in Model.Historico)
+                            {
+                                <tr>
+                                    <td>@p.Data.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@p.Disciplina</td>
+                                    <td>@p.Questionario<br /><small class="text-muted">@p.Capitulo</small></td>
+                                    <td>@p.Acertos/@p.Questoes</td>
+                                    <td><strong>@p.Percentual.ToString("0.#")%</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    }
+</div>

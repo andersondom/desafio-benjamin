@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../DesafioBenjamin/Services/RecompensasService.cs" Link="RecompensasService.cs" />
+    <Compile Include="../../DesafioBenjamin/Services/ProgressoSemanalService.cs" Link="ProgressoSemanalService.cs" />
+    <Compile Include="../../DesafioBenjamin/Models/Tentativa.cs" Link="Tentativa.cs" />
+    <Compile Include="../../DesafioBenjamin/Models/Resposta.cs" Link="Resposta.cs" />
+    <Compile Include="../../DesafioBenjamin/Models/TentativaQuestao.cs" Link="TentativaQuestao.cs" />
+    <Compile Include="../../DesafioBenjamin/Models/Questao.cs" Link="Questao.cs" />
+    <Compile Include="../../DesafioBenjamin/Models/Alternativa.cs" Link="Alternativa.cs" />
+  </ItemGroup>
+</Project>

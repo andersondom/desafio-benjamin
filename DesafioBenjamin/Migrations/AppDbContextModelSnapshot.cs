@@ -84,6 +84,9 @@ namespace DesafioBenjamin.Migrations
 
             modelBuilder.Entity("DesafioBenjamin.Models.Questao", b =>
                 {
+                    b.Property<bool>("Ativa")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");

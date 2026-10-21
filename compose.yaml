@@ -1,0 +1,38 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Data Source=/app/data/desafio-benjamin.db"
+      Ollama__BaseUrl: http://ollama:11434
+      Ollama__Model: qwen3:4b
+      LABORATORIO_IA_LOCAL: "true"
+      ADMIN_USER: ${ADMIN_USER:?Configure ADMIN_USER no arquivo .env local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configure ADMIN_PASSWORD no arquivo .env local}
+    volumes:
+      - app-data:/app/data
+      - materials:/app/materials
+    depends_on:
+      - ollama
+    restart: unless-stopped
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "127.0.0.1:11434:11434"
+    environment:
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: "0"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    # CPU-first: NVIDIA MX250 with 2 GB VRAM is not targeted for GPU offload.
+    # API bound to localhost only; never expose to the public internet.
+volumes:
+  app-data:
+  materials:
+  ollama-data:
