@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../DesafioBenjamin/Services/RecompensasService.cs" Link="RecompensasService.cs" />
+    <Compile Include="../../DesafioBenjamin/Services/ProgressoSemanalService.cs" Link="ProgressoSemanalService.cs" />
     <Compile Include="../../DesafioBenjamin/Models/Tentativa.cs" Link="Tentativa.cs" />
     <Compile Include="../../DesafioBenjamin/Models/Resposta.cs" Link="Resposta.cs" />
     <Compile Include="../../DesafioBenjamin/Models/TentativaQuestao.cs" Link="TentativaQuestao.cs" />
