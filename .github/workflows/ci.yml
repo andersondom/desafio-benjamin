@@ -20,3 +20,11 @@ jobs:
         run: dotnet restore DesafioBenjamin/DesafioBenjamin.csproj
       - name: Build
         run: dotnet build DesafioBenjamin/DesafioBenjamin.csproj --configuration Release --no-restore
+      - name: Smoke tests (18 verificacoes)
+        run: dotnet run --project tests/RecompensasSmoke/RecompensasSmoke.csproj --configuration Release
+      - name: Verify test runner and isolated test script are present
+        shell: bash
+        run: |
+          test -s scripts/Validar-E-Atualizar.ps1
+          test -s scripts/Testar-Fluxo-Jogo.ps1
+          test -s scripts/Testar-Partida-Isolada.ps1
