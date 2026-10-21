@@ -43,4 +43,20 @@ var ongoing = new Tentativa { TotalQuestoes = 10, TotalAcertos = 10 };
 Check(RecompensasService.Conquistas(new[] { ongoing }).Count == 0, "Partida nao finalizada nao gera conquistas");
 Check(RecompensasService.Conquistas(new[] { Finished(9, 10), ongoing }).Count == 2, "Historico ignora partida em andamento");
 Check(RecompensasService.Conquistas(new[] { Finished(10, 10), Finished(10, 10) }).Count == 3, "Conquistas nao duplicam");
-Console.WriteLine("APROVADO: 18 verificacoes de modelos, historico e recompensas.");
+var quarta = new DateTime(2026, 10, 21, 12, 0, 0);
+var inicioSemana = new DateTime(2026, 10, 19);
+var partidasSemana = new[]
+{
+    new Tentativa { FinalizadaEm = inicioSemana, TotalAcertos = 8 },
+    new Tentativa { FinalizadaEm = inicioSemana.AddDays(1), TotalAcertos = 7 },
+    new Tentativa { FinalizadaEm = quarta, TotalAcertos = 5 },
+    new Tentativa { FinalizadaEm = inicioSemana.AddDays(-1), TotalAcertos = 99 },
+    new Tentativa { TotalAcertos = 99 }
+};
+var metas = ProgressoSemanalService.Calcular(partidasSemana, quarta);
+Check(metas.Inicio == inicioSemana, "Semana inicia na segunda-feira");
+Check(metas.Partidas == 3 && metas.Acertos == 20, "Metas ignoram semana anterior e partida aberta");
+Check(metas.MetaPartidasAtingida && metas.MetaAcertosAtingida, "Duas missoes semanais cumpridas");
+var metasVazias = ProgressoSemanalService.Calcular(Array.Empty<Tentativa>(), quarta);
+Check(metasVazias.Partidas == 0 && !metasVazias.MetaPartidasAtingida && !metasVazias.MetaAcertosAtingida, "Semana sem partidas nao gera conquista");
+Console.WriteLine("APROVADO: 22 verificacoes de modelos, historico, recompensas e metas semanais.");
