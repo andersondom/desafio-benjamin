@@ -28,6 +28,7 @@ public class HomeController : Controller
             .Where(t => t.FinalizadaEm != null && t.Aluno.Nome == "Benjamin")
             .ToListAsync();
         ViewBag.TotalDesafios = historico.Count;
+        ViewBag.ProgressoSemanal = ProgressoSemanalService.Calcular(historico, DateTime.Now);
         ViewBag.Estrelas = historico.Sum(RecompensasService.Estrelas);
         ViewBag.Conquistas = RecompensasService.Conquistas(historico);
         ViewBag.TotalAcertos = historico.Sum(t => t.TotalAcertos);
