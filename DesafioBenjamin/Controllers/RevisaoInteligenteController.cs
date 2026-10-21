@@ -23,7 +23,7 @@ public sealed class RevisaoInteligenteController : Controller
                 && r.Questao.Questionario.Disciplina.Ativa)
             .Select(r => new
             {
-                r.QuestaoId, r.Acertou,
+                r.QuestaoId, r.Acertou, r.Tentativa.FinalizadaEm,
                 r.Questao.QuestionarioId,
                 Questionario = r.Questao.Questionario.Titulo,
                 Disciplina = r.Questao.Questionario.Disciplina.Nome,
@@ -60,14 +60,21 @@ public sealed class RevisaoInteligenteController : Controller
                 && r.Tentativa.FinalizadaEm != null
                 && r.Questao.QuestionarioId == questionarioId
                 && r.Questao.Ativa)
-            .Select(r => new { r.QuestaoId, r.Acertou })
+            .Select(r => new { r.QuestaoId, r.Acertou, r.Tentativa.FinalizadaEm })
             .ToListAsync();
 
         var ids = historico.GroupBy(r => r.QuestaoId)
-            .Select(g => new { Id = g.Key, Erros = g.Count(r => !r.Acertou), Total = g.Count() })
+            .Select(g => new
+            {
+                Id = g.Key,
+                Erros = g.Count(r => !r.Acertou),
+                Total = g.Count(),
+                UltimaResposta = g.OrderByDescending(r => r.FinalizadaEm).First()
+            })
             .Where(x => x.Erros > 0)
-            .OrderByDescending(x => x.Erros)
-            .ThenByDescending(x => (double)x.Erros / x.Total)
+            // Prioriza dificuldades persistentes e o ultimo erro; acerto recente reduz prioridade.
+            .OrderByDescending(x => x.Erros * 1.0 / x.Total + (x.UltimaResposta.Acertou ? 0 : 1))
+            .ThenByDescending(x => x.Erros)
             .ThenBy(x => x.Id)
             .Take(10)
             .Select(x => x.Id)
