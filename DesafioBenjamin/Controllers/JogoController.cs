@@ -170,6 +170,8 @@ public class JogoController : Controller
     {
         var tentativa = await _context.Tentativas.FindAsync(tentativaId);
         if (tentativa == null) return NotFound();
+        if (tentativa.FinalizadaEm != null)
+            return RedirectToAction(nameof(Resultado), new { tentativaId });
 
         var tentativaQuestao = await _context.TentativaQuestoes
             .FirstOrDefaultAsync(tq => tq.TentativaId == tentativaId && tq.Ordem == ordem);
@@ -184,6 +186,25 @@ public class JogoController : Controller
 
         if (ordem >= tentativa.TotalQuestoes)
         {
+            // Impede finalizar por POST direto da ultima pergunta sem responder as anteriores.
+            var questoesRespondidas = await _context.Respostas
+                .Where(r => r.TentativaId == tentativaId)
+                .Select(r => r.QuestaoId)
+                .Distinct()
+                .CountAsync();
+
+            if (questoesRespondidas < tentativa.TotalQuestoes)
+            {
+                var primeiraPendente = await _context.TentativaQuestoes
+                    .Where(tq => tq.TentativaId == tentativaId &&
+                        !_context.Respostas.Any(r => r.TentativaId == tentativaId && r.QuestaoId == tq.QuestaoId))
+                    .OrderBy(tq => tq.Ordem)
+                    .Select(tq => tq.Ordem)
+                    .FirstOrDefaultAsync();
+
+                return RedirectToAction(nameof(Pergunta), new { tentativaId, ordem = primeiraPendente > 0 ? primeiraPendente : 1 });
+            }
+
             tentativa.FinalizadaEm = DateTime.Now;
             tentativa.PercentualAcertos =
                 tentativa.TotalQuestoes == 0 ? 0 :
